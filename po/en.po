@@ -1,0 +1,151 @@
+# YouTube Music & Video Player Pro Translation Template.
+# Copyright (C) 2026 Dimitris Tzemos
+# This file is distributed under the same license as the youtube_inside_player package.
+# FIRST AUTHOR <dijemos@gmail.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: youtube_inside_player 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 00:58+0300\n"
+"PO-Revision-Date: 2026-09-29 01:00+0300\n"
+"Last-Translator: Dimitris Tzemos <dijemos@gmail.com>\n"
+"Language-Team: English <en@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.9\n"
+
+#: youtube_player.py:33 youtube_player.py:456
+msgid "YouTube Music & Video Player"
+msgstr "YouTube Music & Video Player"
+
+#: youtube_player.py:72
+msgid "Type song title or artist..."
+msgstr "Type song title or artist..."
+
+#: youtube_player.py:80
+msgid "Clear"
+msgstr "Clear"
+
+#: youtube_player.py:91
+msgid "Search"
+msgstr "Search"
+
+#: youtube_player.py:118
+msgid "Title"
+msgstr "Title"
+
+#: youtube_player.py:122
+msgid "Source"
+msgstr "Source"
+
+#: youtube_player.py:147
+msgid "DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN"
+msgstr "DOUBLE CLICK HERE OR PRESS ESC TO EXIT FULL SCREEN"
+
+#: youtube_player.py:161 youtube_player.py:354 youtube_player.py:388
+#: youtube_player.py:518
+msgid "Pause"
+msgstr "Pause"
+
+#: youtube_player.py:168
+msgid "Volume:"
+msgstr "Volume:"
+
+#: youtube_player.py:183
+msgid "Full Screen (F)"
+msgstr "Full Screen (F)"
+
+#: youtube_player.py:196
+msgid "Play"
+msgstr "Play"
+
+#: youtube_player.py:201
+msgid "Stop"
+msgstr "Stop"
+
+#: youtube_player.py:206
+msgid "Download MP3"
+msgstr "Download MP3"
+
+#: youtube_player.py:211
+msgid "Download MP4"
+msgstr "Download MP4"
+
+#: youtube_player.py:220
+msgid "About"
+msgstr "About"
+
+#: youtube_player.py:232 youtube_player.py:520
+msgid "Ready."
+msgstr "Ready."
+
+#: youtube_player.py:264
+msgid "Searching YouTube..."
+msgstr "Searching YouTube..."
+
+#: youtube_player.py:295
+msgid "Error during search."
+msgstr "Error during search."
+
+#: youtube_player.py:308
+msgid "Displaying"
+msgstr "Displaying"
+
+#: youtube_player.py:308
+msgid "unique results."
+msgstr "unique results."
+
+#: youtube_player.py:350
+msgid "Loading video:"
+msgstr "Loading video:"
+
+#: youtube_player.py:371 youtube_player.py:389 youtube_player.py:427
+msgid "Playing:"
+msgstr "Playing:"
+
+#: youtube_player.py:373
+msgid "Failed to start playback."
+msgstr "Failed to start playback."
+
+#: youtube_player.py:385
+msgid "Resume"
+msgstr "Resume"
+
+#: youtube_player.py:386
+msgid "Playback paused."
+msgstr "Playback paused."
+
+#: youtube_player.py:411
+msgid "Fullscreen Active. Press F, ESC or Double Click to restore."
+msgstr "Fullscreen Active. Press F, ESC or Double Click to restore."
+
+#: youtube_player.py:459
+msgid ""
+"An advanced, thread-safe embedded player for YouTube videos and music with "
+"standalone download support."
+msgstr ""
+"An advanced, thread-safe embedded player for YouTube videos and music with "
+"standalone download support."
+
+#: youtube_player.py:465
+msgid "translator-credits"
+msgstr "Dimitris Tzemos <dijemos@gmail.com>"
+
+#: youtube_player.py:480
+msgid "Started downloading"
+msgstr "Started downloading"
+
+#: youtube_player.py:495
+msgid "Download completed inside"
+msgstr "Download completed inside"
+
+#: youtube_player.py:497
+msgid "Download failed. Make sure ffmpeg is installed."
+msgstr "Download failed. Make sure ffmpeg is installed."
+
+#: youtube_player.py:499
+msgid "Error during download process."
+msgstr "Error during download process."

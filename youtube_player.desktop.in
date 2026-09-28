@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name[el]=YouTube Music & Video Player
+GenericName=YouTube Player & Downloader
+Comment=An advanced embedded player for YouTube videos and music
+Exec=/usr/bin/youtube_player.py
+Icon=youtube_player
+Terminal=false
+Categories=AudioVideo;Player;Video;
+Keywords=YouTube;Video;Music;Player;Downloader;
+StartupNotify=true
+
