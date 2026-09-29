@@ -249,8 +249,8 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.status_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.status_box.set_margin_top(6)
         self.status_box.set_margin_bottom(6)
-        self.status_box.set_margin_left(8)
-        self.status_box.set_margin_right(8)
+        self.status_box.set_margin_start(8)
+        self.status_box.set_margin_end(8)
         
         self.status_image = Gtk.Image.new_from_icon_name("dialog-information", Gtk.IconSize.MENU)
         self.status_label = Gtk.Label()
