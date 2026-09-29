@@ -1,153 +1,166 @@
-# Translation of YouTube Music & Video Player Pro to German.
+# Translation of youtube_player to German.
 # Copyright (C) 2026
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+# This file is distributed under the same license as the youtube_player package.
+# Dimitris Tzemos <dijemos@gmail.com>, 2026.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: youtube_player 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 00:58+0300\n"
-"PO-Revision-Date: 2026-09-29 00:59+0300\n"
+"POT-Creation-Date: 2026-09-29 21:30+0300\n"
+"PO-Revision-Date: 2026-09-29 21:42+0300\n"
 "Last-Translator: Dimitris Tzemos <dijemos@gmail.com>\n"
-"Language-Team: German <kde-i18n-de@kde.org>\n"
+"Language-Team: German <de@li.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.9\n"
 
-#: youtube_player.py:33 youtube_player.py:456
+#: youtube_player.py:46 youtube_player.py:589
 msgid "YouTube Music & Video Player"
-msgstr "YouTube Music & Video Player"
+msgstr "YouTube Musik & Video Player"
 
-#: youtube_player.py:72
+#: youtube_player.py:88
 msgid "Type song title or artist..."
 msgstr "Songtitel oder Künstler eingeben..."
 
-#: youtube_player.py:80
+#: youtube_player.py:96
 msgid "Clear"
 msgstr "Leeren"
 
-#: youtube_player.py:91
+#: youtube_player.py:110
 msgid "Search"
 msgstr "Suchen"
 
-#: youtube_player.py:118
+#: youtube_player.py:137
 msgid "Title"
 msgstr "Titel"
 
-#: youtube_player.py:122
+#: youtube_player.py:141
 msgid "Source"
 msgstr "Quelle"
 
-#: youtube_player.py:147
+#: youtube_player.py:162
 msgid "DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN"
-msgstr "HIER DOPPELKLICKEN ODER ESC / F DRÜCKEN, UM VOLLBILD ZU BEENDEN"
+msgstr "DOPPELKLICK HIER ODER ESC/F DRÜCKEN, UM VOLLBILD ZU BEENDEN"
 
-#: youtube_player.py:161 youtube_player.py:354 youtube_player.py:388
-#: youtube_player.py:518
+#: youtube_player.py:176 youtube_player.py:445 youtube_player.py:532
+#: youtube_player.py:663
 msgid "Pause"
 msgstr "Pause"
 
-#: youtube_player.py:168
+#: youtube_player.py:183
 msgid "Volume:"
 msgstr "Lautstärke:"
 
-#: youtube_player.py:183
+#: youtube_player.py:197
 msgid "Full Screen (F)"
 msgstr "Vollbild (F)"
 
-#: youtube_player.py:196
-msgid "Play"
-msgstr "Wiedergabe"
+#: youtube_player.py:207
+msgid "Autoplay Next"
+msgstr "Nächstes Video automatisch abspielen"
 
-#: youtube_player.py:201
+#: youtube_player.py:218
+msgid "Play"
+msgstr "Abspielen"
+
+#: youtube_player.py:223
 msgid "Stop"
 msgstr "Stopp"
 
-#: youtube_player.py:206
+#: youtube_player.py:228
 msgid "Download MP3"
 msgstr "MP3 herunterladen"
 
-#: youtube_player.py:211
+#: youtube_player.py:233
 msgid "Download MP4"
 msgstr "MP4 herunterladen"
 
-#: youtube_player.py:220
+#: youtube_player.py:241
 msgid "About"
 msgstr "Über"
 
-#: youtube_player.py:232 youtube_player.py:520
+#: youtube_player.py:262 youtube_player.py:665
 msgid "Ready."
 msgstr "Bereit."
 
-#: youtube_player.py:264
-msgid "Searching YouTube..."
-msgstr "YouTube wird durchsucht..."
+#: youtube_player.py:279
+msgid "Cleaning yt-dlp cache storage..."
+msgstr "yt-dlp Cache-Speicher wird bereinigt..."
 
-#: youtube_player.py:295
+#: youtube_player.py:286
+msgid "Cache cleared successfully. System ready."
+msgstr "Cache erfolgreich geleert. System bereit."
+
+#: youtube_player.py:288
+msgid "Failed to purge cache data."
+msgstr "Bereinigung der Cache-Daten fehlgeschlagen."
+
+#: youtube_player.py:344
+msgid "Searching YouTube (fetching 150 items)..."
+msgstr "YouTube wird durchsucht (150 Einträge werden geladen)..."
+
+#: youtube_player.py:381
 msgid "Error during search."
 msgstr "Fehler bei der Suche."
 
-#: youtube_player.py:308
+#: youtube_player.py:400
 msgid "Displaying"
-msgstr "Anzeige von"
+msgstr "Es werden"
 
-#: youtube_player.py:308
+#: youtube_player.py:400
 msgid "unique results."
-msgstr "eindeutigen Ergebnissen."
+msgstr "eindeutige Ergebnisse angezeigt."
 
-#: youtube_player.py:350
+#: youtube_player.py:441
 msgid "Loading video:"
 msgstr "Video wird geladen:"
 
-#: youtube_player.py:371 youtube_player.py:389 youtube_player.py:427
+#: youtube_player.py:471 youtube_player.py:533 youtube_player.py:558
 msgid "Playing:"
-msgstr "Wird abgespielt:"
+msgstr "Wiedergabe:"
 
-#: youtube_player.py:373
+#: youtube_player.py:478
 msgid "Failed to start playback."
 msgstr "Wiedergabe konnte nicht gestartet werden."
 
-#: youtube_player.py:385
+#: youtube_player.py:529
 msgid "Resume"
 msgstr "Fortsetzen"
 
-#: youtube_player.py:386
+#: youtube_player.py:530
 msgid "Playback paused."
 msgstr "Wiedergabe pausiert."
 
-#: youtube_player.py:411
+#: youtube_player.py:547
 msgid "Fullscreen Active. Press F, ESC or Double Click to restore."
-msgstr ""
-"Vollbild aktiv. Drücken Sie F, ESC oder Doppelklick zum Wiederherstellen."
+msgstr "Vollbild aktiv. F, ESC oder Doppelklick drücken, um es zu beenden."
 
-#: youtube_player.py:459
+#: youtube_player.py:592
 msgid ""
 "An advanced, thread-safe embedded player for YouTube videos and music with "
 "standalone download support."
 msgstr ""
-"Ein fortschrittlicher, threadsicherer eingebetteter Player für YouTube-"
-"Videos und Musik mit eigenständiger Download-Unterstützung."
+"Ein fortschrittlicher, thread-sicherer eingebetteter Player für YouTube-Videos "
+"und Musik mit eigenständiger Download-Unterstützung."
 
-#: youtube_player.py:465
+#: youtube_player.py:595
 msgid "translator-credits"
-msgstr "KREDITE_FÜR_ÜBERSETZER"
+msgstr "Dimitris Tzemos <dijemos@gmail.com>"
 
-#: youtube_player.py:480
+#: youtube_player.py:611
 msgid "Started downloading"
 msgstr "Download gestartet"
 
-#: youtube_player.py:495
+#: youtube_player.py:626
 msgid "Download completed inside"
-msgstr "Download abgeschlossen in"
+msgstr "Download erfolgreich abgeschlossen in"
 
-#: youtube_player.py:497
+#: youtube_player.py:628
 msgid "Download failed. Make sure ffmpeg is installed."
-msgstr ""
-"Download fehlgeschlagen. Stellen Sie sicher, dass ffmpeg installiert ist."
+msgstr "Download fehlgeschlagen. Stellen Sie sicher, dass ffmpeg installiert ist."
 
-#: youtube_player.py:499
+#: youtube_player.py:630
 msgid "Error during download process."
 msgstr "Fehler während des Download-Vorgangs."

@@ -8,19 +8,20 @@ import sys
 import json
 import time
 import os
-import socket  # Native replacement for socat
+import socket
 
-# Internationalization
+# Internationalization Setup
 import locale
 import gettext
 
-# DOMAIN DEFINITION: Must match the .mo filename exactly.
 APP_NAME = "youtube_player" 
+
+# GLOBAL CONFIGURATION: Change this number to easily control the max search items
+MAX_RESULTS = 150
 
 locale.setlocale(locale.LC_ALL, '')
 locale.bindtextdomain(APP_NAME, "/usr/share/locale")
 
-# The critical addition for the C library: Locks in UTF-8 for Greek
 if hasattr(locale, 'bind_textdomain_codeset'):
     locale.bind_textdomain_codeset(APP_NAME, "UTF-8")
 
@@ -44,16 +45,15 @@ class YouTubeInsidePlayer(Gtk.Window):
         except Exception: pass
         super().__init__(title=_("YouTube Music & Video Player"))
         
-        # Sizing: List on the left, video on the right
+        # Sizing UI properties
         self.set_default_size(1150, 600)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_border_width(12)
         
-        # Ασφαλής αποθήκευση εικονιδίου στο user space αντί για το /usr/share/
+        # Handle icon asset paths inside user workspace safely
         self.icon_path = os.path.expanduser("/usr/share/pixmaps/youtube_player.png")
         os.makedirs(os.path.dirname(self.icon_path), exist_ok=True)
         if not os.path.exists(self.icon_path):
-            # Χρήση πραγματικού direct link για raw εικόνα PNG
             icon_url = "https://flaticon.com"
             subprocess.Popen(["wget", "-q", "-O", self.icon_path, icon_url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
@@ -66,7 +66,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         
         self.video_urls = []
         self.mpv_process = None
-        self.search_process = None  # Tracks yt-dlp search process to prevent /tmp leaks
+        self.search_process = None  
         self.current_volume = 100 
         self.is_fullscreen = False 
         self.is_paused = False 
@@ -74,11 +74,13 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.current_title = ""
         self.mpv_socket = "/tmp/mpv-active-player-socket"
         self.search_lock = threading.Lock()
+        self.ipc_thread_active = False # Tracks lifecycle monitor loop
+        self.autoplay_enabled = False  # Disabled by default
         
         vbox_main = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         self.add(vbox_main)
 
-        # 1. Top section: Search Bar
+        # 1. Top section: Search Bar Components
         self.search_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         vbox_main.pack_start(self.search_box, False, False, 0)
         
@@ -87,7 +89,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.entry.connect("activate", self.on_search_submitted)
         self.search_box.pack_start(self.entry, True, True, 0)
         
-        # CLEAR BUTTON WITH NATIVE GTK ICON
+        # Clear Button implementation
         self.clear_button = Gtk.Button()
         btn_clear_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         img_clear = Gtk.Image.new_from_icon_name("edit-clear", Gtk.IconSize.BUTTON)
@@ -97,8 +99,11 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.clear_button.add(btn_clear_box)
         self.clear_button.connect("clicked", self.on_clear_clicked)
         self.search_box.pack_start(self.clear_button, False, False, 0)
-        
-        # Search button with native GTK icon
+
+        # Visual loading spinner for deep queries (150 results)
+        self.spinner = Gtk.Spinner()
+        self.search_box.pack_start(self.spinner, False, False, 4)
+        # Search button initialization
         self.search_button = Gtk.Button()
         btn_search_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         img_search = Gtk.Image.new_from_icon_name("edit-find", Gtk.IconSize.BUTTON)
@@ -109,11 +114,11 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.search_button.connect("clicked", self.on_search_submitted)
         self.search_box.pack_start(self.search_button, False, False, 0)
 
-        # 2. Middle section: Horizontal separation
+        # 2. Middle section: Content Display Splitter
         hbox_content = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
         vbox_main.pack_start(hbox_content, True, True, 0)
 
-        # Left: Scrollable Results Table
+        # Left Column: Search Results TreeView
         self.scroll_window = Gtk.ScrolledWindow()
         self.scroll_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.scroll_window.set_size_request(450, -1)
@@ -137,23 +142,22 @@ class YouTubeInsidePlayer(Gtk.Window):
         col_duration.set_min_width(65)
         self.tree_view.append_column(col_duration)
 
-        # Right: Vertical box for the video and controls
+        # Right Column: Embedded Video Pipeline Surface
         right_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         hbox_content.pack_start(right_vbox, True, True, 0)
 
-        # EventBox to capture the native mouse double-click from GTK
         self.video_event_box = Gtk.EventBox()
         self.video_event_box.connect("button-press-event", self.on_video_clicked)
         right_vbox.pack_start(self.video_event_box, True, True, 0)
 
-        # We use an overlay to place the text exactly over the 14px strip.
         self.video_overlay = Gtk.Overlay()
         self.video_event_box.add(self.video_overlay)
-        # The Container Box that will hold the dynamic Socket
+        
         self.video_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.video_container.set_size_request(540, 380)
         self.video_container.set_border_width(14)
         self.video_overlay.add(self.video_container)
+        
         self.fs_info_label = Gtk.Label()
         fs_label_text = _("DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN")
         self.fs_info_label.set_markup(f"<span background='#222222' foreground='#3584e4' size='medium'><b> {fs_label_text} </b></span>")
@@ -165,7 +169,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         
         self.socket = None
 
-        # Control bar below the video
+        # Inline Media Playback Controls
         self.video_control_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         right_vbox.pack_start(self.video_control_bar, False, False, 0)
 
@@ -181,14 +185,12 @@ class YouTubeInsidePlayer(Gtk.Window):
         volume_box.pack_start(lbl_vol, False, False, 0)
         self.video_control_bar.pack_start(volume_box, False, False, 0)
 
-        # Intensity slider (0-100)
         self.volume_slider = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
         self.volume_slider.set_value(self.current_volume)
         self.volume_slider.set_size_request(150, -1)
         self.volume_slider.connect("value-changed", self.on_volume_changed)
         self.video_control_bar.pack_start(self.volume_slider, False, False, 0)
         
-        # Full-screen button with native GTK icon
         self.fullscreen_button = Gtk.Button()
         btn_fs_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         img_fs = Gtk.Image.new_from_icon_name("view-fullscreen", Gtk.IconSize.BUTTON)
@@ -201,11 +203,15 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.fullscreen_button.set_size_request(150, -1)
         self.video_control_bar.pack_start(self.fullscreen_button, False, False, 0)
 
-        # 3. Bottom section: Controls & Status Bar
+        # Autoplay Toggle Button Initialization
+        self.autoplay_check = Gtk.CheckButton(label=_("Autoplay Next"))
+        self.autoplay_check.set_active(self.autoplay_enabled)
+        self.autoplay_check.connect("toggled", self.on_autoplay_toggled)
+        self.video_control_bar.pack_start(self.autoplay_check, False, False, 0)
+        # 3. Bottom section: Controls & Status Frame Bar
         self.bottom_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         vbox_main.pack_start(self.bottom_box, False, False, 0)
         
-        # Standalone row container for buttons
         self.buttons_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self.bottom_box.pack_start(self.buttons_row, False, False, 0)
         
@@ -224,13 +230,11 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.download_button.set_sensitive(False)
         self.buttons_row.pack_start(self.download_button, False, False, 0)
 
-        # Αλλαγή προθέματος σε εικονίδιο βίντεο για ομοιομορφία
         self.download_video_button = Gtk.Button(label=f"♫ {_( 'Download MP4')}")
         self.download_video_button.connect("clicked", lambda b: self.start_download("mp4"))
         self.download_video_button.set_sensitive(False)
         self.buttons_row.pack_start(self.download_video_button, False, False, 0)
         
-        # "About" button with native GTK icon
         self.about_button = Gtk.Button()
         btn_about_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         img_about = Gtk.Image.new_from_icon_name("help-about", Gtk.IconSize.BUTTON)
@@ -241,7 +245,6 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.about_button.connect("clicked", self.show_about_dialog)
         self.buttons_row.pack_start(self.about_button, False, False, 0)
         
-        # Elegant clean Frame Box layout
         self.status_frame = Gtk.Frame()
         self.status_frame.set_shadow_type(Gtk.ShadowType.IN)
         self.bottom_box.pack_start(self.status_frame, False, False, 0)
@@ -272,8 +275,24 @@ class YouTubeInsidePlayer(Gtk.Window):
     def on_clear_clicked(self, button):
         self.entry.set_text("")
         self.entry.grab_focus()
+        # Automatically clean yt-dlp internal tracking cache to speed up deep listings
+        self.update_status(_("Cleaning yt-dlp cache storage..."), icon_name="user-trash")
+        threading.Thread(target=self.clear_ytdlp_cache_thread, daemon=True).start()
+
+    def clear_ytdlp_cache_thread(self):
+        """ Safe backend execution block to empty yt-dlp caching pipes. """
+        try:
+            subprocess.run(["yt-dlp", "--rm-cache-dir"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            self.update_status(_("Cache cleared successfully. System ready."), "green", icon_name="emblem-ok")
+        except Exception:
+            self.update_status(_("Failed to purge cache data."), "red", icon_name="dialog-warning")
+
+    def on_autoplay_toggled(self, button):
+        """ Updates the state when the autoplay checkbox is toggled. """
+        self.autoplay_enabled = button.get_active()
+
     def send_mpv_ipc_command(self, cmd_list):
-        """ Native Python UNIX Socket implementation. Removes 'socat' dependency. """
+        """ Native Python UNIX Socket client implementation. """
         if self.mpv_process and self.mpv_process.poll() is None:
             if os.path.exists(self.mpv_socket):
                 try:
@@ -284,21 +303,52 @@ class YouTubeInsidePlayer(Gtk.Window):
                     client.close()
                 except Exception: pass
 
+    def send_mpv_ipc_query(self, cmd_list):
+        """ Native implementation to request states from the mpv engine instance with robust event filtering. """
+        if self.mpv_process and self.mpv_process.poll() is None:
+            if os.path.exists(self.mpv_socket):
+                try:
+                    payload = json.dumps({"command": cmd_list}) + "\n"
+                    client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                    client.settimeout(0.3)
+                    client.connect(self.mpv_socket)
+                    client.sendall(payload.encode('utf-8'))
+                    
+                    response_data = client.recv(4096).decode('utf-8')
+                    client.close()
+                    
+                    lines = response_data.strip().split('\n')
+                    for line in lines:
+                        if not line.strip(): 
+                            continue
+                        try:
+                            parsed = json.loads(line.strip())
+                            if "error" in parsed:
+                                return parsed
+                        except Exception: pass
+                except Exception: pass
+        return None
+
     def on_search_submitted(self, widget):
         user_input = self.entry.get_text().strip()
         if not user_input: return
         self.search_button.set_sensitive(False)
         self.entry.set_sensitive(False)
+        
+        # Trigger and animate the visual loading spinner on the layout pipe
+        self.spinner.start()
+        
         self.list_store.clear()
         self.video_urls = []
         self.stop_playback()
-        self.update_status(_("Searching YouTube..."), icon_name="edit-find")
+        self.update_status(_("Searching YouTube (fetching 150 items)..."), icon_name="edit-find")
         threading.Thread(target=self.fetch_youtube_results, args=(user_input,), daemon=True).start()
-
+        
     def fetch_youtube_results(self, phrase):
         with self.search_lock:
             try:
-                cmd = ["yt-dlp", "--no-cache-dir", "--skip-download", "--flat-playlist", "--print", "%(url)s\t%(title)s", f"ytsearch25:{phrase}"]
+                # FIXED: Dynamically inject MAX_RESULTS into the yt-dlp command string
+                cmd = ["yt-dlp", "--no-cache-dir", "--skip-download", "--flat-playlist", "--print", "%(url)s\t%(title)s", f"ytsearch{MAX_RESULTS}:{phrase}"]
                 self.search_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
                 local_results = []
                 seen_urls = set()
@@ -314,7 +364,8 @@ class YouTubeInsidePlayer(Gtk.Window):
                     if url in seen_urls: continue
                     seen_urls.add(url)
                     local_results.append((url, title))
-                    if len(local_results) >= 10: break
+                    # FIXED: Dynamically match the loop breaker to MAX_RESULTS
+                    if len(local_results) >= MAX_RESULTS: break
                 if self.search_process:
                     self.search_process.kill()
                     self.search_process.wait()
@@ -328,8 +379,10 @@ class YouTubeInsidePlayer(Gtk.Window):
                     except Exception: pass
                     self.search_process = None
                 self.update_status(_("Error during search."), "red", icon_name="dialog-warning")
+                GLib.idle_add(self.spinner.stop)
                 GLib.idle_add(self.search_button.set_sensitive, True)
                 GLib.idle_add(self.entry.set_sensitive, True)
+
 
     def update_gui_list(self, results):
         self.list_store.clear()
@@ -340,6 +393,10 @@ class YouTubeInsidePlayer(Gtk.Window):
             self.video_urls.append(url)
             self.list_store.append([str(count), title, "YouTube"])
             count += 1
+            
+        # Stops spinner animation when data has fully landed on the screen
+        self.spinner.stop()
+        
         self.update_status(f"{_('Displaying')} {len(self.video_urls)} {_('unique results.')}", icon_name="emblem-ok")
         self.play_button.set_sensitive(True)
         self.download_button.set_sensitive(True)
@@ -363,11 +420,11 @@ class YouTubeInsidePlayer(Gtk.Window):
             index = int(row_num_str) - 1
             if 0 <= index < len(self.video_urls): return self.video_urls[index], title
         return None, None
+
     def play_video(self, url, title):
         if not url: return
         self.current_url = url
         self.current_title = title
-        # `stop_playback` was removed from here to prevent it from executing twice within the thread.
         GLib.idle_add(self.recreate_socket_and_start_mpv, url, title)
 
     def recreate_socket_and_start_mpv(self, url, title):
@@ -388,10 +445,15 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.pause_button.set_label(f"⏸ {_( 'Pause')}")
         self.is_paused = False
 
+        # Optimized MPV engine configuration options with session persistence hooks
         mpv_cmd = [
             "mpv",
             f"--wid={socket_id}",
-            "--vo=x11",
+            "--vo=gpu",
+            "--gpu-context=x11egl",
+            "--input-vo-keyboard=no",
+            "--keep-open=yes",           
+            "--idle=yes",                
             "--osc=yes",
             "--script-opts=osc-visibility=always",
             f"--input-ipc-server={self.mpv_socket}",
@@ -406,13 +468,54 @@ class YouTubeInsidePlayer(Gtk.Window):
                 stdout=subprocess.DEVNULL, 
                 stderr=subprocess.DEVNULL
             )
-            self.update_status(
-                f"{_('Playing:')} {title}", 
-                icon_name="media-playback-start"
-            )
+            self.update_status(f"{_('Playing:')} {title}", icon_name="media-playback-start")
+            
+            # Spawn the background tracking thread for window session persistence
+            self.ipc_thread_active = True
+            threading.Thread(target=self.monitor_mpv_playback, daemon=True).start()
+            
         except Exception:
             self.update_status(_("Failed to start playback."), "red", icon_name="dialog-error")
         return False
+    def monitor_mpv_playback(self):
+        """ Checks IPC socket state to cleanly exit fullscreen or play next video when finished. """
+        while self.ipc_thread_active:
+            if not self.mpv_process or self.mpv_process.poll() is not None:
+                break
+            
+            # Query the core engine for EOF status property records
+            res = self.send_mpv_ipc_query(["get_property", "eof-reached"])
+            
+            # Check if the cleaned response confirms EOF success
+            if res and isinstance(res, dict):
+                if res.get("error") == "success" and res.get("data") is True:
+                    # Target reached: Safely drop out of fullscreen if active
+                    if self.is_fullscreen:
+                        GLib.idle_add(self.toggle_fullscreen)
+                    
+                    # Trigger next video injection
+                    if self.autoplay_enabled:
+                        GLib.idle_add(self.play_next_video)
+                    break
+                    
+            time.sleep(0.4)
+
+    def play_next_video(self):
+        """ Automatically selects and plays the next row in the TreeView list. """
+        selection = self.tree_view.get_selection()
+        model, treeiter = selection.get_selected()
+        
+        if treeiter is not None:
+            # Get the next row iterator
+            next_iter = model.iter_next(treeiter)
+            if next_iter is not None:
+                # Select the next row visually in the UI
+                selection.select_iter(next_iter)
+                # Trigger the playback sequence on a fresh safe thread
+                url, title = self.get_selected_url()
+                if url:
+                    self.stop_playback()
+                    threading.Thread(target=self.play_video, args=(url, title), daemon=True).start()
 
     def on_volume_changed(self, scroll):
         self.current_volume = self.volume_slider.get_value()
@@ -430,10 +533,8 @@ class YouTubeInsidePlayer(Gtk.Window):
                 self.update_status(f"{_('Playing:')} {self.current_title}", icon_name="media-playback-start")
 
     def toggle_fullscreen(self):
-        if not self.mpv_process or self.mpv_process.poll() is not None:
-            return
-
         if not self.is_fullscreen:
+            # Hide layout structures before applying fullscreen metrics
             self.search_box.hide()
             self.scroll_window.hide()
             self.video_control_bar.hide()
@@ -471,7 +572,8 @@ class YouTubeInsidePlayer(Gtk.Window):
                 return True
             return False
 
-        if keyname == "f" or keyname == "F":
+        # FIXED: Added support for both English (f/F) and Greek (Greek_phi/Greek_PHI) layouts
+        if keyname in ["f", "F", "Greek_phi", "Greek_PHI"]:
             self.toggle_fullscreen()
             return True
         elif keyname == "Escape" and self.is_fullscreen:
@@ -479,6 +581,7 @@ class YouTubeInsidePlayer(Gtk.Window):
             return True
             
         return False
+
 
     def show_about_dialog(self, button):
         about = Gtk.AboutDialog()
@@ -530,7 +633,9 @@ class YouTubeInsidePlayer(Gtk.Window):
         GLib.idle_add(self.download_video_button.set_sensitive, True)
 
     def stop_playback(self):
-        if self.is_fullscreen: self.toggle_fullscreen()
+        self.ipc_thread_active = False 
+        if self.is_fullscreen: 
+            self.toggle_fullscreen()
         
         if self.mpv_process:
             try:
@@ -562,13 +667,13 @@ class YouTubeInsidePlayer(Gtk.Window):
     def on_play_button_clicked(self, button):
         url, title = self.get_selected_url()
         if url: 
-            self.stop_playback() # Forced stop on the main UI thread before the new video starts.
+            self.stop_playback() 
             threading.Thread(target=self.play_video, args=(url, title), daemon=True).start()
 
     def on_row_double_clicked(self, tree_view, path, column):
         url, title = self.get_selected_url()
         if url: 
-            self.stop_playback() # Forced stop on the main UI thread before the new video starts.
+            self.stop_playback() 
             threading.Thread(target=self.play_video, args=(url, title), daemon=True).start()
 
     def on_destroy(self, widget):
