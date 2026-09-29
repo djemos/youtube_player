@@ -8,7 +8,7 @@ import sys
 import json
 import time
 import os
-import socket  # Native αντικατάσταση του socat
+import socket  # Native replacement for socat
 
 # Internationalization
 import locale
@@ -367,7 +367,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         if not url: return
         self.current_url = url
         self.current_title = title
-        # Αφαιρέθηκε η stop_playback από εδώ για να μην εκτελείται διπλά μέσα στο thread
+        # `stop_playback` was removed from here to prevent it from executing twice within the thread.
         GLib.idle_add(self.recreate_socket_and_start_mpv, url, title)
 
     def recreate_socket_and_start_mpv(self, url, title):
@@ -562,13 +562,13 @@ class YouTubeInsidePlayer(Gtk.Window):
     def on_play_button_clicked(self, button):
         url, title = self.get_selected_url()
         if url: 
-            self.stop_playback() # Αναγκαστικό Stop στο Main UI Thread πριν ξεκινήσει το νέο βίντεο
+            self.stop_playback() # Forced stop on the main UI thread before the new video starts.
             threading.Thread(target=self.play_video, args=(url, title), daemon=True).start()
 
     def on_row_double_clicked(self, tree_view, path, column):
         url, title = self.get_selected_url()
         if url: 
-            self.stop_playback() # Αναγκαστικό Stop στο Main UI Thread πριν ξεκινήσει το νέο βίντεο
+            self.stop_playback() # Forced stop on the main UI thread before the new video starts.
             threading.Thread(target=self.play_video, args=(url, title), daemon=True).start()
 
     def on_destroy(self, widget):
