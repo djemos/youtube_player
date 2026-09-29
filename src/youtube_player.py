@@ -588,9 +588,9 @@ class YouTubeInsidePlayer(Gtk.Window):
         about.set_transient_for(self) 
         about.set_program_name(_("YouTube Music & Video Player"))
         about.set_version("1.0")
-        about.set_copyright("Copyright © 2026")
+        about.set_copyright("Copyright © 2026 Dimitris Tzemos <dijemos@gmail.com>")
         about.set_comments(_("An advanced, thread-safe embedded player for YouTube videos and music with standalone download support."))
-        about.set_website("https://github.com")
+        about.set_website("https://github.com/djemos/youtube_player")
         about.set_authors(["Dimitris Tzemos <dijemos@gmail.com>"])
         about.set_translator_credits(_("translator-credits"))
         
