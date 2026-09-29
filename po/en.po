@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: youtube_inside_player 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-29 21:30+0300\n"
-"PO-Revision-Date: 2026-09-29 21:35+0300\n"
+"PO-Revision-Date: 2026-09-29 22:15+0300\n"
 "Last-Translator: Dimitris Tzemos <dijemos@gmail.com>\n"
 "Language-Team: English <en@li.org>\n"
 "Language: en\n"
@@ -100,7 +100,7 @@ msgstr "Failed to purge cache data."
 
 #: youtube_player.py:344
 msgid "Searching YouTube (fetching 150 items)..."
-msgstr "Searching YouTube..."
+msgstr "Searching YouTube (fetching 150 items)..."
 
 #: youtube_player.py:381
 msgid "Error during search."
