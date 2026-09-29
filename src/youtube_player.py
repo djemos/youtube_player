@@ -141,7 +141,6 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.video_container.set_size_request(540, 380)
         self.video_container.set_border_width(14)
         self.video_overlay.add(self.video_container)
-
         self.fs_info_label = Gtk.Label()
         fs_label_text = _("DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN")
         self.fs_info_label.set_markup(f"<span background='#222222' foreground='#3584e4' size='medium'><b> {fs_label_text} </b></span>")
@@ -175,6 +174,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.volume_slider.set_size_request(150, -1)
         self.volume_slider.connect("value-changed", self.on_volume_changed)
         self.video_control_bar.pack_start(self.volume_slider, False, False, 0)
+        
         # Full-screen button with native GTK icon
         self.fullscreen_button = Gtk.Button()
         btn_fs_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
@@ -189,28 +189,32 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.video_control_bar.pack_start(self.fullscreen_button, False, False, 0)
 
         # 3. Bottom section: Controls & Status Bar
-        self.bottom_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.bottom_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         vbox_main.pack_start(self.bottom_box, False, False, 0)
+        
+        # Row box dedicated exclusively for layout actions
+        self.buttons_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.bottom_box.pack_start(self.buttons_row, False, False, 0)
         
         self.play_button = Gtk.Button(label=f"▶ {_( 'Play')}")
         self.play_button.connect("clicked", self.on_play_button_clicked)
         self.play_button.set_sensitive(False)
-        self.bottom_box.pack_start(self.play_button, False, False, 0)
+        self.buttons_row.pack_start(self.play_button, False, False, 0)
         
         self.stop_button = Gtk.Button(label=f"⏹ {_( 'Stop')}")
         self.stop_button.connect("clicked", lambda b: self.stop_playback())
         self.stop_button.set_sensitive(False)
-        self.bottom_box.pack_start(self.stop_button, False, False, 0)
+        self.buttons_row.pack_start(self.stop_button, False, False, 0)
 
         self.download_button = Gtk.Button(label=f"♫ {_( 'Download MP3')}")
         self.download_button.connect("clicked", lambda b: self.start_download("mp3"))
         self.download_button.set_sensitive(False)
-        self.bottom_box.pack_start(self.download_button, False, False, 0)
+        self.buttons_row.pack_start(self.download_button, False, False, 0)
 
         self.download_video_button = Gtk.Button(label=f"♫ {_( 'Download MP4')}")
         self.download_video_button.connect("clicked", lambda b: self.start_download("mp4"))
         self.download_video_button.set_sensitive(False)
-        self.bottom_box.pack_start(self.download_video_button, False, False, 0)
+        self.buttons_row.pack_start(self.download_video_button, False, False, 0)
         
         # "About" button with native GTK icon
         self.about_button = Gtk.Button()
@@ -221,18 +225,28 @@ class YouTubeInsidePlayer(Gtk.Window):
         btn_about_box.pack_start(lbl_about, False, False, 0)
         self.about_button.add(btn_about_box)
         self.about_button.connect("clicked", self.show_about_dialog)
-        self.bottom_box.pack_start(self.about_button, False, False, 0)
+        self.buttons_row.pack_start(self.about_button, False, False, 0)
         
-        # Status bar with Box and native info icon
-        self.status_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        # Clean Box Frame targeting state modifications
+        self.status_frame = Gtk.Frame()
+        self.status_frame.set_shadow_type(Gtk.ShadowType.IN)
+        self.bottom_box.pack_start(self.status_frame, False, False, 0)
+
+        self.status_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        self.status_box.set_margin_top(6)
+        self.status_box.set_margin_bottom(6)
+        self.status_box.set_margin_left(8)
+        self.status_box.set_margin_right(8)
+        
         self.status_image = Gtk.Image.new_from_icon_name("dialog-information", Gtk.IconSize.MENU)
         self.status_label = Gtk.Label()
         self.status_label.set_halign(Gtk.Align.START)
+        self.status_label.set_line_wrap(True) 
         self.status_label.set_markup(f"<span foreground='gray'><i>{_('Ready.')}</i></span>")
         
         self.status_box.pack_start(self.status_image, False, False, 0)
         self.status_box.pack_start(self.status_label, True, True, 0)
-        self.bottom_box.pack_start(self.status_box, True, True, 0)
+        self.status_frame.add(self.status_box)
 
         self.connect("key-release-event", self.on_key_release)
         self.connect("destroy", self.on_destroy)
@@ -244,7 +258,6 @@ class YouTubeInsidePlayer(Gtk.Window):
     def on_clear_clicked(self, button):
         self.entry.set_text("")
         self.entry.grab_focus()
-
     def send_mpv_ipc_command(self, cmd_list):
         if self.mpv_process and self.mpv_process.poll() is None:
             if os.path.exists(self.mpv_socket):
@@ -252,6 +265,7 @@ class YouTubeInsidePlayer(Gtk.Window):
                     payload = json.dumps({"command": cmd_list}) + "\n"
                     subprocess.run(["socat", "-", self.mpv_socket], input=payload, text=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 except Exception: pass
+
     def on_search_submitted(self, widget):
         user_input = self.entry.get_text().strip()
         if not user_input: return
@@ -334,7 +348,6 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.current_title = title
         self.stop_playback()
         GLib.idle_add(self.recreate_socket_and_start_mpv, url, title)
-
     def recreate_socket_and_start_mpv(self, url, title):
         for child in self.video_container.get_children():
             self.video_container.remove(child)
@@ -366,8 +379,15 @@ class YouTubeInsidePlayer(Gtk.Window):
         ]
         
         try:
-            self.mpv_process = subprocess.Popen(mpv_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            self.update_status(f"{_('Playing:')} {title}", icon_name="media-playback-start")
+            self.mpv_process = subprocess.Popen(
+                mpv_cmd, 
+                stdout=subprocess.DEVNULL, 
+                stderr=subprocess.DEVNULL
+            )
+            self.update_status(
+                f"{_('Playing:')} {title}", 
+                icon_name="media-playback-start"
+            )
         except Exception:
             self.update_status(_("Failed to start playback."), "red", icon_name="dialog-error")
         return False
@@ -387,7 +407,6 @@ class YouTubeInsidePlayer(Gtk.Window):
                 self.pause_button.set_label(f"⏸ {_( 'Pause')}")
                 self.update_status(f"{_('Playing:')} {self.current_title}", icon_name="media-playback-start")
 
-    # AUTHENTIC TOGGLE FULLSCREEN: Preserves the native structure and the .show() / .hide() methods of the Label.
     def toggle_fullscreen(self):
         if not self.mpv_process or self.mpv_process.poll() is not None:
             return
@@ -396,30 +415,20 @@ class YouTubeInsidePlayer(Gtk.Window):
             self.search_box.hide()
             self.scroll_window.hide()
             self.video_control_bar.hide()
-            
-            self.play_button.hide()
-            self.stop_button.hide()
-            self.download_button.hide()
-            self.download_video_button.hide()
-            self.about_button.hide() 
+            self.buttons_row.hide()
             
             self.fullscreen() 
             self.is_fullscreen = True
             
-            self.fs_info_label.show() # Display the native top label
+            self.fs_info_label.show() 
             self.update_status(_("Fullscreen Active. Press F, ESC or Double Click to restore."), icon_name="view-fullscreen")
         else:
-            self.fs_info_label.hide() # Hide the top native label
+            self.fs_info_label.hide() 
             
             self.search_box.show()
             self.scroll_window.show()
             self.video_control_bar.show()
-            
-            self.play_button.show()
-            self.stop_button.show()
-            self.download_button.show()
-            self.download_video_button.show()
-            self.about_button.show() 
+            self.buttons_row.show()
             
             self.unfullscreen() 
             self.is_fullscreen = False
@@ -459,8 +468,6 @@ class YouTubeInsidePlayer(Gtk.Window):
         about.set_website("https://github.com")
         
         about.set_authors(["Dimitris Tzemos <dijemos@gmail.com>"])
-        #about.set_documenters(["Slackware Documentation Team <docs@slackware.com>"])
-        #about.set_artists(["Flaticon Artists <info@flaticon.com>"])
         about.set_translator_credits(_("translator-credits"))
         
         if self.app_pixbuf:
@@ -471,6 +478,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         about.set_license_type(Gtk.License.GPL_3_0)
         about.connect("response", lambda d, r: d.destroy())
         about.show()
+
     def start_download(self, file_type):
         url, title = self.get_selected_url()
         if url:
