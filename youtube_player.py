@@ -1016,7 +1016,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         about.set_website("https://github.com/djemos/youtube_player")
         about.set_authors(["Dimitris Tzemos <dijemos@gmail.com>"])
         about.set_translator_credits(_("translator-credits"))
-        
+                
         if self.app_pixbuf: about.set_logo(self.app_pixbuf)
         about.set_license_type(Gtk.License.GPL_3_0)
         about.connect("response", lambda d, r: d.destroy())
