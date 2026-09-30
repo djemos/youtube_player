@@ -17,7 +17,7 @@ import gettext
 APP_NAME = "youtube_player" 
 
 # GLOBAL CONFIGURATION
-MAX_RESULTS = 50
+MAX_RESULTS = 150
 CONFIG_DIR = os.path.expanduser("~/.config/youtube_player")
 PLAYLISTS_FILE = os.path.join(CONFIG_DIR, "playlists.json")
 
