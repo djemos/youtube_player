@@ -85,10 +85,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.current_playlist_videos = [] # Holds (url, title) lists for active playlist view
         self.active_playback_source = "search" # "search" or "playlist"
         self.load_playlists()
-
-
         ###///////////////
-
         vbox_main = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         self.add(vbox_main)
         # 1. Top section: Search Bar Components
@@ -1010,7 +1007,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         about = Gtk.AboutDialog()
         about.set_transient_for(self) 
         about.set_program_name(_("YouTube Music & Video Player"))
-        about.set_version("1.0")
+        about.set_version("2.0")
         about.set_copyright("Copyright © 2026 Dimitris Tzemos <dijemos@gmail.com>")
         about.set_comments(_("An advanced, thread-safe embedded player for YouTube videos and music with standalone download support."))
         about.set_website("https://github.com")
