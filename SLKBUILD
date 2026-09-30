@@ -1,7 +1,7 @@
 #Packager: Dimitris Tzemos <dijemos~at~gmail~dot~com>
 
 pkgname=youtube_player
-pkgver=1.0
+pkgver=2.0
 pkgrel=1dj
 arch=noarch
 source=("youtube_player.tar.bz2")

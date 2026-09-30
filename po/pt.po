@@ -1,5 +1,5 @@
-# Translation of youtube_player to European Portuguese.
-# Copyright (C) 2026
+# Translation of youtube_player to Portuguese (Portugal).
+# Copyright (C) 2026 Dimitris Tzemos
 # This file is distributed under the same license as the youtube_player package.
 # Dimitris Tzemos <dijemos@gmail.com>, 2026.
 #
@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: youtube_player 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 21:30+0300\n"
-"PO-Revision-Date: 2026-09-29 21:50+0300\n"
+"POT-Creation-Date: 2026-09-30 19:33+0300\n"
+"PO-Revision-Date: 2026-09-30 20:40+0300\n"
 "Last-Translator: Dimitris Tzemos <dijemos@gmail.com>\n"
 "Language-Team: Portuguese <pt@li.org>\n"
 "Language: pt\n"
@@ -16,151 +16,205 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: youtube_player.py:46 youtube_player.py:589
+#: src/youtube_player.py:48 src/youtube_player.py:963
 msgid "YouTube Music & Video Player"
 msgstr "Reprodutor de Música e Vídeo do YouTube"
 
-#: youtube_player.py:88
+#: src/youtube_player.py:98
 msgid "Type song title or artist..."
 msgstr "Digite o título da música ou artista..."
 
-#: youtube_player.py:96
+#: src/youtube_player.py:106
 msgid "Clear"
 msgstr "Limpar"
 
-#: youtube_player.py:110
+#: src/youtube_player.py:121
 msgid "Search"
-msgstr "Pesquisar"
+msgstr "Procurar"
 
-#: youtube_player.py:137
-msgid "Title"
-msgstr "Título"
+#: src/youtube_player.py:158
+msgid "Search Results"
+msgstr "Resultados da Pesquisa"
 
-#: youtube_player.py:141
-msgid "Source"
-msgstr "Fonte"
+#: src/youtube_player.py:166
+msgid "Add Selected to Playlist"
+msgstr "Adicionar Selecionado à Playlist"
 
-#: youtube_player.py:162
+#: src/youtube_player.py:194
 msgid "DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN"
-msgstr "CLIQUE DUPLO AQUI OU PRESSIONE ESC OU F PARA SAIR DO ECRÃ INTEIRO"
+msgstr "CLIQUE DUPLO AQUI OU PRESSIONE ESC OU F PARA SAIR DO MODO ECRÃ INTEIRO"
 
-#: youtube_player.py:176 youtube_player.py:445 youtube_player.py:532
-#: youtube_player.py:663
+#: src/youtube_player.py:211 src/youtube_player.py:791
+#: src/youtube_player.py:910 src/youtube_player.py:1045
 msgid "Pause"
 msgstr "Pausar"
 
-#: youtube_player.py:183
-msgid "Volume:"
-msgstr "Volume:"
-
-#: youtube_player.py:197
+#: src/youtube_player.py:234
 msgid "Full Screen (F)"
 msgstr "Ecrã Inteiro (F)"
 
-#: youtube_player.py:207
+#: src/youtube_player.py:243
 msgid "Autoplay Next"
-msgstr "Reprodução automática"
+msgstr "Reprodução Automática"
 
-#: youtube_player.py:218
+#: src/youtube_player.py:259
+msgid "New List"
+msgstr "Nova Lista"
+
+#: src/youtube_player.py:288
+msgid "Playlist Tracks"
+msgstr "Faixas da Playlist"
+
+#: src/youtube_player.py:296
+msgid "Remove Selected Track"
+msgstr "Remover Faixa Selecionada"
+
+#: src/youtube_player.py:308
+msgid "Delete Playlist"
+msgstr "Eliminar Playlist"
+
+#: src/youtube_player.py:328
 msgid "Play"
 msgstr "Reproduzir"
 
-#: youtube_player.py:223
+#: src/youtube_player.py:339
 msgid "Stop"
 msgstr "Parar"
 
-#: youtube_player.py:228
+#: src/youtube_player.py:350
 msgid "Download MP3"
 msgstr "Descarregar MP3"
 
-#: youtube_player.py:233
+#: src/youtube_player.py:361
 msgid "Download MP4"
 msgstr "Descarregar MP4"
 
-#: youtube_player.py:241
+#: src/youtube_player.py:374
 msgid "About"
 msgstr "Sobre"
 
-#: youtube_player.py:262 youtube_player.py:665
+#: src/youtube_player.py:396 src/youtube_player.py:1047
 msgid "Ready."
 msgstr "Pronto."
 
-#: youtube_player.py:279
+#: src/youtube_player.py:526
+msgid "No active playlist selected to delete."
+msgstr "Nenhuma playlist ativa selecionada para eliminação."
+
+#: src/youtube_player.py:530
+msgid "Cannot delete the default baseline profile."
+msgstr "Não é possível eliminar o perfil predefinido do sistema."
+
+#: src/youtube_player.py:538
+msgid "Delete Playlist Confirmation"
+msgstr "Confirmação de Eliminação de Playlist"
+
+#: src/youtube_player.py:540
+msgid "Are you absolutely sure you want to permanently delete"
+msgstr "Tem a certeza absoluta de que deseja eliminar permanentemente a lista"
+
+#: src/youtube_player.py:555
+msgid "Playlist"
+msgstr "A Playlist"
+
+#: src/youtube_player.py:555
+msgid "deleted successfully."
+msgstr "foi eliminada com sucesso."
+
+#: src/youtube_player.py:560
+msgid "Create New Playlist"
+msgstr "Criar Nova Playlist"
+
+#: src/youtube_player.py:561
+msgid "Enter a unique name for your custom playlist:"
+msgstr "Introduza um nome exclusivo para a sua playlist personalizada:"
+
+#: src/youtube_player.py:583
+msgid "Playlist name already exists!"
+msgstr "O nome desta playlist já existe!"
+
+#: src/youtube_player.py:594
+msgid "Create or select a playlist first!"
+msgstr "Crie ou selecione uma playlist primeiro!"
+
+#: src/youtube_player.py:598
+msgid "Track already exists in this list."
+msgstr "Esta faixa já existe nesta lista."
+
+#: src/youtube_player.py:603
+msgid "Added to"
+msgstr "adicionado à lista"
+
+#: src/youtube_player.py:616
+msgid "Track removed from list."
+msgstr "Faixa removida da lista."
+
+#: src/youtube_player.py:626
 msgid "Cleaning yt-dlp cache storage..."
 msgstr "A limpar o armazenamento de cache do yt-dlp..."
 
-#: youtube_player.py:286
+#: src/youtube_player.py:632
 msgid "Cache cleared successfully. System ready."
-msgstr "Cache limpo com sucesso. Sistema pronto."
+msgstr "Cache limpa com sucesso. O sistema está pronto."
 
-#: youtube_player.py:288
+#: src/youtube_player.py:634
 msgid "Failed to purge cache data."
 msgstr "Falha ao limpar os dados de cache."
 
-#: youtube_player.py:344
+#: src/youtube_player.py:686
 msgid "Searching YouTube (fetching 150 items)..."
 msgstr "A pesquisar no YouTube (a obter 150 itens)..."
 
-#: youtube_player.py:381
+#: src/youtube_player.py:721
 msgid "Error during search."
 msgstr "Erro durante a pesquisa."
 
-#: youtube_player.py:400
+#: src/youtube_player.py:736
 msgid "Displaying"
-msgstr "A exibir"
+msgstr "A apresentar"
 
-#: youtube_player.py:400
+#: src/youtube_player.py:736
 msgid "unique results."
-msgstr "resultados únicos."
+msgstr "resultados exclusivos."
 
-#: youtube_player.py:441
+#: src/youtube_player.py:784
 msgid "Loading video:"
 msgstr "A carregar vídeo:"
 
-#: youtube_player.py:471 youtube_player.py:533 youtube_player.py:558
+#: src/youtube_player.py:816 src/youtube_player.py:911
 msgid "Playing:"
 msgstr "A reproduzir:"
 
-#: youtube_player.py:478
+#: src/youtube_player.py:820
 msgid "Failed to start playback."
 msgstr "Falha ao iniciar a reprodução."
 
-#: youtube_player.py:529
+#: src/youtube_player.py:906
 msgid "Resume"
 msgstr "Retomar"
 
-#: youtube_player.py:530
+#: src/youtube_player.py:907
 msgid "Playback paused."
-msgstr "Reprodução em pausa."
+msgstr "A reprodução foi pausada."
 
-#: youtube_player.py:547
-msgid "Fullscreen Active. Press F, ESC or Double Click to restore."
-msgstr "Ecrã inteiro ativo. Pressione F, ESC ou duplo clique para restaurar."
-
-#: youtube_player.py:592
+#: src/youtube_player.py:966
 msgid ""
 "An advanced, thread-safe embedded player for YouTube videos and music with "
 "standalone download support."
-msgstr ""
-"Um reprodutor integrado avançado e thread-safe para vídeos e músicas do YouTube "
-"com suporte a descarregamentos autónomos."
+msgstr "Um reprodutor integrado avançado e seguro para threads para vídeos e músicas do YouTube com suporte a descarregamento autónomo."
 
-#: youtube_player.py:595
-msgid "translator-credits"
-msgstr "Dimitris Tzemos <dijemos@gmail.com>"
-
-#: youtube_player.py:611
+#: src/youtube_player.py:984
 msgid "Started downloading"
-msgstr "Descarregamento iniciado"
+msgstr "O descarregamento foi iniciado"
 
-#: youtube_player.py:626
+#: src/youtube_player.py:999
 msgid "Download completed inside"
-msgstr "Descarregamento concluído com sucesso em"
+msgstr "Descarregamento concluído em"
 
-#: youtube_player.py:628
+#: src/youtube_player.py:1001
 msgid "Download failed. Make sure ffmpeg is installed."
 msgstr "Falha no descarregamento. Certifique-se de que o ffmpeg está instalado."
 
-#: youtube_player.py:630
+#: src/youtube_player.py:1003
 msgid "Error during download process."
 msgstr "Erro durante o processo de descarregamento."

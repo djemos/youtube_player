@@ -1,5 +1,5 @@
 # Translation of youtube_player to Greek.
-# Copyright (C) 2026
+# Copyright (C) 2026 Dimitris Tzemos
 # This file is distributed under the same license as the youtube_player package.
 # Dimitris Tzemos <dijemos@gmail.com>, 2026.
 #
@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: youtube_player 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 21:30+0300\n"
-"PO-Revision-Date: 2026-09-30 08:48+0300\n"
+"POT-Creation-Date: 2026-09-30 19:33+0300\n"
+"PO-Revision-Date: 2026-09-30 21:02+0300\n"
 "Last-Translator: Dimitris Tzemos <dijemos@gmail.com>\n"
 "Language-Team: Greek <el@li.org>\n"
 "Language: el\n"
@@ -17,152 +17,202 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.9\n"
 
-#: youtube_player.py:46 youtube_player.py:589
+#: src/youtube_player.py:48 src/youtube_player.py:963
 msgid "YouTube Music & Video Player"
-msgstr "YouTube Music & Video Player"
+msgstr "Αναπαραγωγέας Μουσικής & Βίντεο YouTube"
 
-#: youtube_player.py:88
+#: src/youtube_player.py:98
 msgid "Type song title or artist..."
 msgstr "Πληκτρολογήστε τίτλο τραγουδιού ή καλλιτέχνη..."
 
-#: youtube_player.py:96
+#: src/youtube_player.py:106
 msgid "Clear"
 msgstr "Καθαρισμός"
 
-#: youtube_player.py:110
+#: src/youtube_player.py:121
 msgid "Search"
 msgstr "Αναζήτηση"
 
-#: youtube_player.py:137
-msgid "Title"
-msgstr "Τίτλος"
+#: src/youtube_player.py:158
+msgid "Search Results"
+msgstr "Αποτελέσματα Αναζήτησης"
 
-#: youtube_player.py:141
-msgid "Source"
-msgstr "Πηγή"
+#: src/youtube_player.py:166
+msgid "Add Selected to Playlist"
+msgstr "Προσθήκη Επιλεγμένου στην Playlist"
 
-#: youtube_player.py:162
+#: src/youtube_player.py:194
 msgid "DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN"
-msgstr "ΔΙΠΛΟ ΚΛΙΚ ΕΔΩ Η ΠΑΤΗΣΤΕ ESC Η F,Φ ΓΙΑ ΕΞΟΔΟ ΑΠΟ ΠΛΗΡΗ ΟΘΟΝΗ"
+msgstr "ΔΙΠΛΟ ΚΛΙΚ ΕΔΩ Η ΠΑΤΗΣΤΕ ESC Η F ΓΙΑ ΕΞΟΔΟ ΑΠΟ ΠΛΗΡΗ ΟΘΟΝΗ"
 
-#: youtube_player.py:176 youtube_player.py:445 youtube_player.py:532
-#: youtube_player.py:663
+#: src/youtube_player.py:211 src/youtube_player.py:791 src/youtube_player.py:910 src/youtube_player.py:1045
 msgid "Pause"
 msgstr "Παύση"
 
-#: youtube_player.py:183
-msgid "Volume:"
-msgstr "Ένταση:"
-
-#: youtube_player.py:197
+#: src/youtube_player.py:234
 msgid "Full Screen (F)"
 msgstr "Πλήρης Οθόνη (F)"
 
-#: youtube_player.py:207
+#: src/youtube_player.py:243
 msgid "Autoplay Next"
-msgstr "Αυτόματη αναπαραγωγή επόμενου"
+msgstr "Αυτόματη Αναπαραγωγή Επόμενου"
 
-#: youtube_player.py:218
+#: src/youtube_player.py:259
+msgid "New List"
+msgstr "Νέα Λίστα"
+
+#: src/youtube_player.py:288
+msgid "Playlist Tracks"
+msgstr "Κομμάτια Playlist"
+
+#: src/youtube_player.py:296
+msgid "Remove Selected Track"
+msgstr "Αφαίρεση Επιλεγμένου Κομματιού"
+
+#: src/youtube_player.py:308
+msgid "Delete Playlist"
+msgstr "Διαγραφή Playlist"
+
+#: src/youtube_player.py:328
 msgid "Play"
 msgstr "Αναπαραγωγή"
 
-#: youtube_player.py:223
+#: src/youtube_player.py:339
 msgid "Stop"
 msgstr "Διακοπή"
 
-#: youtube_player.py:228
+#: src/youtube_player.py:350
 msgid "Download MP3"
 msgstr "Λήψη MP3"
 
-#: youtube_player.py:233
+#: src/youtube_player.py:361
 msgid "Download MP4"
 msgstr "Λήψη MP4"
 
-#: youtube_player.py:241
+#: src/youtube_player.py:374
 msgid "About"
-msgstr "Σχετικά"
+msgstr "Πληροφορίες"
 
-#: youtube_player.py:262 youtube_player.py:665
+#: src/youtube_player.py:396 src/youtube_player.py:1047
 msgid "Ready."
 msgstr "Έτοιμο."
 
-#: youtube_player.py:279
+#: src/youtube_player.py:526
+msgid "No active playlist selected to delete."
+msgstr "Δεν έχει επιλεγεί ενεργή λίστα αναπαραγωγής προς διαγραφή."
+
+#: src/youtube_player.py:530
+msgid "Cannot delete the default baseline profile."
+msgstr "Αδυναμία διαγραφής του προκαθορισμένου βασικού προφίλ."
+
+#: src/youtube_player.py:538
+msgid "Delete Playlist Confirmation"
+msgstr "Επιβεβαίωση Διαγραφής Playlist"
+
+#: src/youtube_player.py:540
+msgid "Are you absolutely sure you want to permanently delete"
+msgstr "Είστε απόλυτα σίγουροι ότι θέλετε να διαγράψετε μόνιμα τη λίστα"
+
+#: src/youtube_player.py:555
+msgid "Playlist"
+msgstr "Η Playlist"
+
+#: src/youtube_player.py:555
+msgid "deleted successfully."
+msgstr "διαγράφηκε με επιτυχία."
+
+#: src/youtube_player.py:560
+msgid "Create New Playlist"
+msgstr "Δημιουργία Νέας Playlist"
+
+#: src/youtube_player.py:561
+msgid "Enter a unique name for your custom playlist:"
+msgstr "Εισάγετε ένα μοναδικό όνομα για τη δική σας λίστα αναπαραγωγής:"
+
+#: src/youtube_player.py:583
+msgid "Playlist name already exists!"
+msgstr "Το όνομα της λίστας αναπαραγωγής υπάρχει ήδη!"
+
+#: src/youtube_player.py:594
+msgid "Create or select a playlist first!"
+msgstr "Δημιουργήστε ή επιλέξτε μια λίστα αναπαραγωγής πρώτα!"
+
+#: src/youtube_player.py:598
+msgid "Track already exists in this list."
+msgstr "Το κομμάτι υπάρχει ήδη σε αυτή τη λίστα."
+
+#: src/youtube_player.py:603
+msgid "Added to"
+msgstr "Προστέθηκε στη λίστα"
+
+#: src/youtube_player.py:616
+msgid "Track removed from list."
+msgstr "Το κομμάτι αφαιρέθηκε από τη λίστα."
+
+#: src/youtube_player.py:626
 msgid "Cleaning yt-dlp cache storage..."
-msgstr "Καθαρισμός χώρου αποθήκευσης cache του yt-dlp..."
+msgstr "Καθαρισμός αποθηκευτικού χώρου cache του yt-dlp..."
 
-#: youtube_player.py:286
+#: src/youtube_player.py:632
 msgid "Cache cleared successfully. System ready."
-msgstr "Η προσωρινή μνήμη (cache) καθαρίστηκε επιτυχώς. Το σύστημα είναι έτοιμο."
+msgstr "Η cache καθαρίστηκε με επιτυχία. Το σύστημα είναι έτοιμο."
 
-#: youtube_player.py:288
+#: src/youtube_player.py:634
 msgid "Failed to purge cache data."
 msgstr "Αποτυχία εκκαθάρισης δεδομένων cache."
 
-#: youtube_player.py:344
+#: src/youtube_player.py:686
 msgid "Searching YouTube (fetching 150 items)..."
 msgstr "Αναζήτηση στο YouTube (ανάκτηση 150 στοιχείων)..."
 
-#: youtube_player.py:381
+#: src/youtube_player.py:721
 msgid "Error during search."
 msgstr "Σφάλμα κατά την αναζήτηση."
 
-#: youtube_player.py:400
+#: src/youtube_player.py:736
 msgid "Displaying"
 msgstr "Εμφάνιση"
 
-#: youtube_player.py:400
+#: src/youtube_player.py:736
 msgid "unique results."
 msgstr "μοναδικών αποτελεσμάτων."
 
-#: youtube_player.py:441
+#: src/youtube_player.py:784
 msgid "Loading video:"
 msgstr "Φόρτωση βίντεο:"
 
-#: youtube_player.py:471 youtube_player.py:533 youtube_player.py:558
+#: src/youtube_player.py:816 src/youtube_player.py:911
 msgid "Playing:"
 msgstr "Αναπαραγωγή:"
 
-#: youtube_player.py:478
+#: src/youtube_player.py:820
 msgid "Failed to start playback."
 msgstr "Αποτυχία έναρξης αναπαραγωγής."
 
-#: youtube_player.py:529
+#: src/youtube_player.py:906
 msgid "Resume"
 msgstr "Συνέχιση"
 
-#: youtube_player.py:530
+#: src/youtube_player.py:907
 msgid "Playback paused."
 msgstr "Η αναπαραγωγή τέθηκε σε παύση."
 
-#: youtube_player.py:547
-msgid "Fullscreen Active. Press F, ESC or Double Click to restore."
-msgstr "Πλήρης Οθόνη Ενεργή. Πατήστε F,Φ, ESC ή Διπλό Κλικ για επαναφορά."
+#: src/youtube_player.py:966
+msgid "An advanced, thread-safe embedded player for YouTube videos and music with standalone download support."
+msgstr "Ένας προηγμένος, ασφαλής για νήματα (thread-safe) ενσωματωμένος αναπαραγωγέας για βίντεο και μουσική από το YouTube με αυτόνομη υποστήριξη λήψης."
 
-#: youtube_player.py:592
-msgid ""
-"An advanced, thread-safe embedded player for YouTube videos and music with "
-"standalone download support."
-msgstr ""
-"Ένα προηγμένο, ασφαλές για πολυνηματική λειτουργία (thread-safe) ενσωματωμένο "
-"πρόγραμμα αναπαραγωγής για βίντεο και μουσική του YouTube, με δυνατότητα "
-"αυτόνομης λήψης."
-
-#: youtube_player.py:595
-msgid "translator-credits"
-msgstr "Δημήτρης Τζέμος <dijemos@gmail.com>"
-
-#: youtube_player.py:611
+#: src/youtube_player.py:984
 msgid "Started downloading"
-msgstr "Ξεκίνησε η λήψη του"
+msgstr "Ξεκίνησε η λήψη"
 
-#: youtube_player.py:626
+#: src/youtube_player.py:999
 msgid "Download completed inside"
-msgstr "Η λήψη ολοκληρώθηκε επιτυχώς μέσα στο"
+msgstr "Η λήψη ολοκληρώθηκε μέσα στο"
 
-#: youtube_player.py:628
+#: src/youtube_player.py:1001
 msgid "Download failed. Make sure ffmpeg is installed."
 msgstr "Η λήψη απέτυχε. Βεβαιωθείτε ότι το ffmpeg είναι εγκατεστημένο."
 
-#: youtube_player.py:630
+#: src/youtube_player.py:1003
 msgid "Error during download process."
-msgstr "Σφάλμα κατά τη διαδικασία λήψης."
+msgstr "Σφάλμα κατά τη διάρκεια της διαδικασίας λήψης."

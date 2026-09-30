@@ -1,5 +1,5 @@
 # Translation of youtube_player to Spanish.
-# Copyright (C) 2026
+# Copyright (C) 2026 Dimitris Tzemos
 # This file is distributed under the same license as the youtube_player package.
 # Dimitris Tzemos <dijemos@gmail.com>, 2026.
 #
@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: youtube_player 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 21:30+0300\n"
-"PO-Revision-Date: 2026-09-29 21:44+0300\n"
+"POT-Creation-Date: 2026-09-30 19:33+0300\n"
+"PO-Revision-Date: 2026-09-30 20:25+0300\n"
 "Last-Translator: Dimitris Tzemos <dijemos@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es\n"
@@ -16,151 +16,205 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: youtube_player.py:46 youtube_player.py:589
+#: src/youtube_player.py:48 src/youtube_player.py:963
 msgid "YouTube Music & Video Player"
 msgstr "Reproductor de Música y Video de YouTube"
 
-#: youtube_player.py:88
+#: src/youtube_player.py:98
 msgid "Type song title or artist..."
-msgstr "Escriba el título de la canción o artista..."
+msgstr "Escribe el título de la canción o artista..."
 
-#: youtube_player.py:96
+#: src/youtube_player.py:106
 msgid "Clear"
 msgstr "Limpiar"
 
-#: youtube_player.py:110
+#: src/youtube_player.py:121
 msgid "Search"
 msgstr "Buscar"
 
-#: youtube_player.py:137
-msgid "Title"
-msgstr "Título"
+#: src/youtube_player.py:158
+msgid "Search Results"
+msgstr "Resultados de la Búsqueda"
 
-#: youtube_player.py:141
-msgid "Source"
-msgstr "Fuente"
+#: src/youtube_player.py:166
+msgid "Add Selected to Playlist"
+msgstr "Añadir Seleccionado a la Playlist"
 
-#: youtube_player.py:162
+#: src/youtube_player.py:194
 msgid "DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN"
-msgstr "DOBLE CLIC AQUÍ O PRESIONE ESC O F PARA SALIR DE LA PANTALLA COMPLETA"
+msgstr "DOBLE CLIC AQUÍ O PRESIONE ESC O F PARA SALIR DE PANTALLA COMPLETA"
 
-#: youtube_player.py:176 youtube_player.py:445 youtube_player.py:532
-#: youtube_player.py:663
+#: src/youtube_player.py:211 src/youtube_player.py:791
+#: src/youtube_player.py:910 src/youtube_player.py:1045
 msgid "Pause"
 msgstr "Pausar"
 
-#: youtube_player.py:183
-msgid "Volume:"
-msgstr "Volumen:"
-
-#: youtube_player.py:197
+#: src/youtube_player.py:234
 msgid "Full Screen (F)"
 msgstr "Pantalla Completa (F)"
 
-#: youtube_player.py:207
+#: src/youtube_player.py:243
 msgid "Autoplay Next"
-msgstr "Reproducción automática"
+msgstr "Reproducción Automática"
 
-#: youtube_player.py:218
+#: src/youtube_player.py:259
+msgid "New List"
+msgstr "Nueva Lista"
+
+#: src/youtube_player.py:288
+msgid "Playlist Tracks"
+msgstr "Canciones de la Playlist"
+
+#: src/youtube_player.py:296
+msgid "Remove Selected Track"
+msgstr "Eliminar Canción Seleccionada"
+
+#: src/youtube_player.py:308
+msgid "Delete Playlist"
+msgstr "Eliminar Playlist"
+
+#: src/youtube_player.py:328
 msgid "Play"
 msgstr "Reproducir"
 
-#: youtube_player.py:223
+#: src/youtube_player.py:339
 msgid "Stop"
 msgstr "Detener"
 
-#: youtube_player.py:228
+#: src/youtube_player.py:350
 msgid "Download MP3"
 msgstr "Descargar MP3"
 
-#: youtube_player.py:233
+#: src/youtube_player.py:361
 msgid "Download MP4"
 msgstr "Descargar MP4"
 
-#: youtube_player.py:241
+#: src/youtube_player.py:374
 msgid "About"
 msgstr "Acerca de"
 
-#: youtube_player.py:262 youtube_player.py:665
+#: src/youtube_player.py:396 src/youtube_player.py:1047
 msgid "Ready."
 msgstr "Listo."
 
-#: youtube_player.py:279
+#: src/youtube_player.py:526
+msgid "No active playlist selected to delete."
+msgstr "No se ha seleccionado ninguna playlist activa para eliminar."
+
+#: src/youtube_player.py:530
+msgid "Cannot delete the default baseline profile."
+msgstr "No se puede eliminar el perfil predeterminado del sistema."
+
+#: src/youtube_player.py:538
+msgid "Delete Playlist Confirmation"
+msgstr "Confirmación de Eliminación de Playlist"
+
+#: src/youtube_player.py:540
+msgid "Are you absolutely sure you want to permanently delete"
+msgstr "¿Está absolutamente seguro de que desea eliminar permanentemente la lista"
+
+#: src/youtube_player.py:555
+msgid "Playlist"
+msgstr "La Playlist"
+
+#: src/youtube_player.py:555
+msgid "deleted successfully."
+msgstr "se eliminó correctamente."
+
+#: src/youtube_player.py:560
+msgid "Create New Playlist"
+msgstr "Crear Nueva Playlist"
+
+#: src/youtube_player.py:561
+msgid "Enter a unique name for your custom playlist:"
+msgstr "Introduzca un nombre único para su playlist personalizada:"
+
+#: src/youtube_player.py:583
+msgid "Playlist name already exists!"
+msgstr "¡El nombre de esta playlist ya existe!"
+
+#: src/youtube_player.py:594
+msgid "Create or select a playlist first!"
+msgstr "¡Cree o seleccione una playlist primero!"
+
+#: src/youtube_player.py:598
+msgid "Track already exists in this list."
+msgstr "Esta canción ya existe en esta lista."
+
+#: src/youtube_player.py:603
+msgid "Added to"
+msgstr "añadido a la lista"
+
+#: src/youtube_player.py:616
+msgid "Track removed from list."
+msgstr "Canción eliminada de la lista."
+
+#: src/youtube_player.py:626
 msgid "Cleaning yt-dlp cache storage..."
 msgstr "Limpiando el almacenamiento de caché de yt-dlp..."
 
-#: youtube_player.py:286
+#: src/youtube_player.py:632
 msgid "Cache cleared successfully. System ready."
-msgstr "Caché limpiada con éxito. Sistema listo."
+msgstr "Caché limpiada correctamente. El sistema está listo."
 
-#: youtube_player.py:288
+#: src/youtube_player.py:634
 msgid "Failed to purge cache data."
 msgstr "Error al limpiar los datos de caché."
 
-#: youtube_player.py:344
+#: src/youtube_player.py:686
 msgid "Searching YouTube (fetching 150 items)..."
 msgstr "Buscando en YouTube (obteniendo 150 elementos)..."
 
-#: youtube_player.py:381
+#: src/youtube_player.py:721
 msgid "Error during search."
 msgstr "Error durante la búsqueda."
 
-#: youtube_player.py:400
+#: src/youtube_player.py:736
 msgid "Displaying"
 msgstr "Mostrando"
 
-#: youtube_player.py:400
+#: src/youtube_player.py:736
 msgid "unique results."
 msgstr "resultados únicos."
 
-#: youtube_player.py:441
+#: src/youtube_player.py:784
 msgid "Loading video:"
 msgstr "Cargando video:"
 
-#: youtube_player.py:471 youtube_player.py:533 youtube_player.py:558
+#: src/youtube_player.py:816 src/youtube_player.py:911
 msgid "Playing:"
 msgstr "Reproduciendo:"
 
-#: youtube_player.py:478
+#: src/youtube_player.py:820
 msgid "Failed to start playback."
 msgstr "Error al iniciar la reproducción."
 
-#: youtube_player.py:529
+#: src/youtube_player.py:906
 msgid "Resume"
 msgstr "Reanudar"
 
-#: youtube_player.py:530
+#: src/youtube_player.py:907
 msgid "Playback paused."
 msgstr "Reproducción pausada."
 
-#: youtube_player.py:547
-msgid "Fullscreen Active. Press F, ESC or Double Click to restore."
-msgstr "Pantalla completa activa. Presione F, ESC o Doble Clic para restaurar."
-
-#: youtube_player.py:592
+#: src/youtube_player.py:966
 msgid ""
 "An advanced, thread-safe embedded player for YouTube videos and music with "
 "standalone download support."
-msgstr ""
-"Un reproductor integrado avanzado y seguro para hilos para videos y música de "
-"YouTube con soporte de descarga independiente."
+msgstr "Un reproductor incrustado avanzado y seguro para hilos para videos y música de YouTube con soporte de descarga independiente."
 
-#: youtube_player.py:595
-msgid "translator-credits"
-msgstr "Dimitris Tzemos <dijemos@gmail.com>"
-
-#: youtube_player.py:611
+#: src/youtube_player.py:984
 msgid "Started downloading"
 msgstr "Descarga iniciada"
 
-#: youtube_player.py:626
+#: src/youtube_player.py:999
 msgid "Download completed inside"
-msgstr "Descarga completada con éxito en"
+msgstr "Descarga completada en"
 
-#: youtube_player.py:628
+#: src/youtube_player.py:1001
 msgid "Download failed. Make sure ffmpeg is installed."
 msgstr "Error en la descarga. Asegúrese de que ffmpeg esté instalado."
 
-#: youtube_player.py:630
+#: src/youtube_player.py:1003
 msgid "Error during download process."
 msgstr "Error durante el proceso de descarga."

@@ -1,7 +1,13 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name[el]=YouTube Music & Video Player
+Name[el]=Αναπαραγωγέας Μουσικής & Βίντεο YouTube
+Name[br]=Reprodutor de Vídeo e Música do YouTube
+Name[de]=YouTube Musik- & Videoplayer
+Name[es]=Reproductor de Música y Video de YouTube
+Name[pt]=Reprodutor de Música e Vídeo do YouTube
+Name[fr]=Lecteur de Musique & Vidéo YouTube
+Name[it]=Riproduttore Video e Musica di YouTube
 GenericName=YouTube Player & Downloader
 Comment=An advanced embedded player for YouTube videos and music
 Exec=/usr/bin/youtube_player.py
