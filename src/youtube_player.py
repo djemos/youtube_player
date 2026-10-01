@@ -1054,7 +1054,6 @@ class YouTubeInsidePlayer(Gtk.Window):
             
         GLib.idle_add(self.download_button.set_sensitive, True)
         GLib.idle_add(self.download_video_button.set_sensitive, True)
-    #////////////////
 
     def stop_playback(self):
         self.ipc_thread_active = False 
@@ -1076,7 +1075,7 @@ class YouTubeInsidePlayer(Gtk.Window):
                 self.search_process.wait()
             except Exception: pass
             self.search_process = None
-            
+        
         if os.path.exists(self.mpv_socket):
             try: os.remove(self.mpv_socket)
             except Exception: pass
@@ -1085,8 +1084,8 @@ class YouTubeInsidePlayer(Gtk.Window):
         GLib.idle_add(self.fullscreen_button.set_sensitive, False)
         GLib.idle_add(self.pause_button.set_sensitive, False)
         
-        # Keep Play active if there is any track loaded in the current workspace arrays
-        if self.video_urls:
+        # FIXED: Keeps Play active if there is any track available in search OR playlist memory arrays
+        if self.video_urls or self.current_playlist_videos:
             GLib.idle_add(self.play_button.set_sensitive, True)
         else:
             GLib.idle_add(self.play_button.set_sensitive, False)
@@ -1101,21 +1100,18 @@ class YouTubeInsidePlayer(Gtk.Window):
         url_s, title_s = self.get_selected_search_url()
         url_p, title_p = self.get_selected_playlist_url()
         
-        # Scenario 1: User target is the Playlist side based on the last mouse click interaction
         if self.last_clicked_view == "playlist" and url_p:
             self.stop_playback()
             self.active_playback_source = "playlist"
             threading.Thread(target=self.play_video, args=(url_p, title_p), daemon=True).start()
             return
 
-        # Scenario 2: User target is the Search side based on the last mouse click interaction
         if self.last_clicked_view == "search" and url_s:
             self.stop_playback()
             self.active_playback_source = "search"
             threading.Thread(target=self.play_video, args=(url_s, title_s), daemon=True).start()
             return
             
-        # Fallback: If the last clicked view has no selection, check the alternative side safely
         if url_p:
             self.stop_playback()
             self.active_playback_source = "playlist"
@@ -1148,3 +1144,4 @@ if __name__ == "__main__":
     win = YouTubeInsidePlayer()
     win.show_all()
     Gtk.main()
+    
