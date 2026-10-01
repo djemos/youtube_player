@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: youtube_player 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-30 22:05+0300\n"
-"PO-Revision-Date: 2026-09-30 22:11+0300\n"
+"PO-Revision-Date: 2026-10-01 14:06+0300\n"
 "Last-Translator: Dimitris Tzemos <dijemos@gmail.com>\n"
 "Language-Team: Greek <el@li.org>\n"
 "Language: el\n"
@@ -39,7 +39,7 @@ msgstr "Αποτελέσματα Αναζήτησης"
 
 #: youtube_player.py:167
 msgid "Add Selected to Playlist"
-msgstr "Προσθήκη Επιλεγμένου στην Playlist"
+msgstr "Προσθήκη Επιλεγμένου στην Λίστα"
 
 #: youtube_player.py:195
 msgid "DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN"
@@ -64,7 +64,7 @@ msgstr "Νέα Λίστα"
 
 #: youtube_player.py:289
 msgid "Playlist Tracks"
-msgstr "Κομμάτια Playlist"
+msgstr "Κομμάτια Λίστας"
 
 #: youtube_player.py:297
 msgid "Remove Selected Track"
@@ -72,7 +72,7 @@ msgstr "Αφαίρεση Επιλεγμένου Κομματιού"
 
 #: youtube_player.py:309
 msgid "Delete Playlist"
-msgstr "Διαγραφή Playlist"
+msgstr "Διαγραφή Λίστας"
 
 #: youtube_player.py:329
 msgid "Play"
@@ -104,7 +104,7 @@ msgstr "Δεν έχει επιλεγεί ενεργή λίστα αναπαρα�
 
 #: youtube_player.py:536
 msgid "Delete Playlist Confirmation"
-msgstr "Επιβεβαίωση Διαγραφής Playlist"
+msgstr "Επιβεβαίωση Διαγραφής Λίστας"
 
 #: youtube_player.py:538
 msgid "Are you absolutely sure you want to permanently delete"
@@ -112,7 +112,7 @@ msgstr "Είστε απόλυτα σίγουροι ότι θέλετε να δι
 
 #: youtube_player.py:552
 msgid "Playlist"
-msgstr "Η Playlist"
+msgstr "Η Λίστα"
 
 #: youtube_player.py:552
 msgid "deleted successfully."
@@ -120,7 +120,7 @@ msgstr "διαγράφηκε με επιτυχία."
 
 #: youtube_player.py:558 youtube_player.py:589
 msgid "Create New Playlist"
-msgstr "Δημιουργία Νέας Playlist"
+msgstr "Δημιουργία Νέας Λίστας"
 
 #: youtube_player.py:559 youtube_player.py:590
 msgid "Enter a unique name for your custom playlist:"
