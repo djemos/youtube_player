@@ -1087,6 +1087,7 @@ class YouTubeInsidePlayer(Gtk.Window):
             
             self.unfullscreen() 
             self.is_fullscreen = False
+
     ############################
 
     def on_video_clicked(self, widget, event):
