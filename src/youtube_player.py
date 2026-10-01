@@ -518,6 +518,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         """Enforces clean sequential 1,2,3... layout numbers without affecting active selection tracks."""
         for idx, row in enumerate(self.list_store):
             self.list_store[row.iter][0] = str(idx + 1)
+            #self.list_store.set_value(row.iter, 0, str(idx + 1))
         return False
 
     def on_delete_playlist_clicked(self, button):
