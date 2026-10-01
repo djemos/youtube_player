@@ -17,7 +17,7 @@ import gettext
 APP_NAME = "youtube_player" 
 
 # GLOBAL CONFIGURATION
-MAX_RESULTS = 150
+MAX_RESULTS = 50
 CONFIG_DIR = os.path.expanduser("~/.config/youtube_player")
 PLAYLISTS_FILE = os.path.join(CONFIG_DIR, "playlists.json")
 
@@ -86,7 +86,6 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.active_playback_source = "search" # "search" or "playlist"
         self.load_playlists()
 
-
         ###///////////////
 
         vbox_main = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -141,7 +140,12 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.list_store = Gtk.ListStore(str, str, str)
         self.tree_view = Gtk.TreeView(model=self.list_store)
         self.scroll_window.add(self.tree_view)
-        
+        #########
+        # Προσθήκη για το Focus της Αναζήτησης:
+        self.tree_view.connect("drag-begin", self.on_search_drag_begin_event)
+        self.dragged_search_item_title = None
+        self.old_search_urls_map = []
+        #########
         # Track last click interaction focus states
         self.tree_view.connect("button-press-event", lambda w, e: setattr(self, 'last_clicked_view', 'search') or False)
 
@@ -268,6 +272,13 @@ class YouTubeInsidePlayer(Gtk.Window):
 
         self.playlist_store = Gtk.ListStore(str, str) # Index, Video Title
         self.playlist_tree_view = Gtk.TreeView(model=self.playlist_store)
+        
+        
+        self.playlist_tree_view.connect("drag-begin", self.on_playlist_drag_begin)
+        # Αρχικοποίηση της μεταβλητής στο None
+        self.dragged_item_title = None 
+        
+        
         self.playlist_tree_view.set_reorderable(True) # Allows reordering playlist rows via drag and drop
         # Connect row drop event to save the new updated sequence order into the JSON file
         self.playlist_store.connect("row-deleted", self.on_playlist_row_reordered)
@@ -446,6 +457,12 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.refresh_playlist_ui_view()
         
     def refresh_playlist_ui_view(self):
+        # Temporarily disconnect change signals to prevent them from triggering during Clear/Append
+        try:
+            self.playlist_store.disconnect_by_func(self.on_playlist_row_reordered)
+        except TypeError:
+            pass
+
         self.playlist_store.clear()
         self.current_playlist_videos = []
         active_list_name = self.playlist_combo.get_active_text()
@@ -453,17 +470,21 @@ class YouTubeInsidePlayer(Gtk.Window):
             self.current_playlist_videos = self.playlists[active_list_name]
             for idx, item in enumerate(self.current_playlist_videos):
                 self.playlist_store.append([str(idx + 1), item["title"]])
+        
+        # Reconnect the signal that catches Drag and Drop (row-deleted is emitted at the end of the move)
+        self.playlist_store.connect("row-deleted", self.on_playlist_row_reordered)
 
     def on_playlist_row_reordered(self, model, path):
-        """Triggered automatically when a playlist row is reordered to save database changes and lock running track focus."""
+        """Triggered automatically when a playlist row is reordered via drag and drop."""
         active_list_name = self.playlist_combo.get_active_text()
         if not active_list_name or active_list_name not in self.playlists:
             return
-    #---###########################
 
         new_ordered_list = []
+        TITLE_COLUMN = 1 
+        
         for row in self.playlist_store:
-            title_on_screen = row
+            title_on_screen = row[TITLE_COLUMN]
             for item in self.playlists[active_list_name]:
                 if item["title"] == title_on_screen:
                     new_ordered_list.append(item)
@@ -474,52 +495,168 @@ class YouTubeInsidePlayer(Gtk.Window):
             self.current_playlist_videos = new_ordered_list
             self.save_playlists()
             
-            # Temporarily disconnect listener to rewrite index indices cleanly
+            # Get the currently selected item BEFORE modifying the numbering
+            selection = self.playlist_tree_view.get_selection()
+            sel_model, sel_iter = selection.get_selected()
+            selected_title = None
+            if sel_iter:
+                selected_title = sel_model.get_value(sel_iter, TITLE_COLUMN)
+
+            # Defer the numbering rewrite and focus lock to the next idle cycle,
+            # allowing GTK enough time to internally complete the drag operation.
+            GLib.idle_add(lambda: self.normalize_playlist_ui_and_focus(selected_title))
+
+
+    def on_playlist_drag_begin(self, tree_view, context):
+        """Captures the title of the row being dragged at the exact moment the drag starts."""
+        TITLE_COLUMN = 1
+        selection = tree_view.get_selection()
+        model, treeiter = selection.get_selected()
+        if treeiter:
+            self.dragged_item_title = model.get_value(treeiter, TITLE_COLUMN)
+        else:
+            self.dragged_item_title = None
+
+    def on_playlist_row_reordered(self, model, path):
+        """Triggered automatically when a playlist row is reordered via drag and drop."""
+        active_list_name = self.playlist_combo.get_active_text()
+        if not active_list_name or active_list_name not in self.playlists:
+            return
+
+        new_ordered_list = []
+        TITLE_COLUMN = 1 
+        
+        for row in self.playlist_store:
+            title_on_screen = row[TITLE_COLUMN]
+            for item in self.playlists[active_list_name]:
+                if item["title"] == title_on_screen:
+                    new_ordered_list.append(item)
+                    break
+
+        if len(new_ordered_list) == len(self.playlists[active_list_name]):
+            self.playlists[active_list_name] = new_ordered_list
+            self.current_playlist_videos = new_ordered_list
+            self.save_playlists()
+            
+            # Keep the title we started dragging
+            target_title = self.dragged_item_title
+
+            # Defer the numbering rewrite and focus lock to the next idle cycle,
+            # ensuring the drop operation is fully completed by GTK.
+            GLib.idle_add(lambda: self.normalize_playlist_ui_and_focus(target_title))
+
+    def normalize_playlist_ui_and_focus(self, target_title):
+        """Fixes sequential numbers and locks focus back onto the dragged or active item."""
+        try:
             self.playlist_store.disconnect_by_func(self.on_playlist_row_reordered)
-            
-            playing_iter = None
-            for idx, row in enumerate(self.playlist_store):
-                row = str(idx + 1)
-                # Track down if this specific row is the video currently active in the mpv core pipeline
-                if self.active_playback_source == "playlist" and self.current_playlist_videos[idx]["url"] == self.current_url:
-                    playing_iter = row.iter
+        except TypeError:
+            pass
 
-            self.playlist_store.connect("row-deleted", self.on_playlist_row_reordered)
-            
-            # Force restore visual high-light metrics back onto the actively playing track node safely
-            if playing_iter:
-                self.playlist_tree_view.get_selection().select_iter(playing_iter)
+        playing_iter = None
+        focus_iter = None
+        TITLE_COLUMN = 1
 
-    def on_search_drag_end(self, tree_view, context):
-        """Triggered automatically after the native GTK drag operation completes to sync URLs and fix numbering without losing focus."""
-        old_titles_map = []
+        for idx, row in enumerate(self.playlist_store):
+            # 1. Clean update of the sequential numbering (1, 2, 3...)
+            self.playlist_store.set_value(row.iter, 0, str(idx + 1))
+            
+            # 2. Identify the moved row based on the stored title
+            if target_title and row[TITLE_COLUMN] == target_title:
+                focus_iter = row.iter
+                
+            # 3. Identify the actively playing video
+            if (self.active_playback_source == "playlist" and 
+                    idx < len(self.current_playlist_videos) and 
+                    self.current_playlist_videos[idx]["url"] == self.current_url):
+                playing_iter = row.iter
+
+        # Enforce focus on the moved row (it will never lose its position again)
+        if focus_iter:
+            self.playlist_tree_view.get_selection().select_iter(focus_iter)
+            path = self.playlist_store.get_path(focus_iter)
+            self.playlist_tree_view.scroll_to_cell(path, None, False, 0, 0)
+
+        # Clear the variable for the next drag operation
+        self.dragged_item_title = None
+
+        # Reconnect the signal
+        self.playlist_store.connect("row-deleted", self.on_playlist_row_reordered)
+        return False
+
+    def on_search_drag_begin_event(self, tree_view, context):
+        """Captures the title and creates an exact URL-to-Title map BEFORE the layout changes."""
+        TITLE_COLUMN = 1
+        selection = tree_view.get_selection()
+        model, treeiter = selection.get_selected()
+        if treeiter:
+            self.dragged_search_item_title = model.get_value(treeiter, TITLE_COLUMN)
+        else:
+            self.dragged_search_item_title = None
+
+        # 💡 HERE IS THE SECRET: Lock the correct mapping before the screen UI updates!
+        self.old_search_urls_map = []
         for idx in range(len(self.video_urls)):
             if idx < len(self.list_store):
                 try:
                     orig_iter = self.list_store.get_iter(Gtk.TreePath.new_from_indices([idx]))
-                    old_titles_map.append({"url": self.video_urls[idx], "title": self.list_store.get_value(orig_iter, 1)})
-                except Exception: pass
+                    screen_title = self.list_store.get_value(orig_iter, TITLE_COLUMN)
+                    self.old_search_urls_map.append({
+                        "url": self.video_urls[idx], 
+                        "title": screen_title
+                    })
+                except Exception: 
+                    pass
 
+    def on_search_drag_end(self, tree_view, context):
+        """Triggered automatically after the native GTK drag operation completes to fix numbering and sync URLs safely."""
+        TITLE_COLUMN = 1
+        
+        # If for some reason drag-begin didn't have time to run, do nothing
+        if not hasattr(self, 'old_search_urls_map') or not self.old_search_urls_map:
+            return
+
+        # Build the NEW sequence of URLs using the clean, old map
         new_ordered_urls = []
         for row in self.list_store:
-            title_on_screen = row
-            for item in old_titles_map:
+            title_on_screen = row[TITLE_COLUMN] 
+            for item in self.old_search_urls_map:
                 if item["title"] == title_on_screen:
                     new_ordered_urls.append(item["url"])
                     break
 
+        # Immediately update the memory list with the new sequence
         if len(new_ordered_urls) == len(self.video_urls):
             self.video_urls = new_ordered_urls
 
-        # Defer numbering rewrite to next idle cycle to preserve native selection tracking updates
-        GLib.idle_add(lambda: self.normalize_search_row_numbers())
+        # Keep the title for focus selection tracking
+        target_title = self.dragged_search_item_title
 
-    def normalize_search_row_numbers(self):
-        """Enforces clean sequential 1,2,3... layout numbers without affecting active selection tracks."""
+        # Defer numbering rewrite to next idle cycle to preserve native selection tracking updates
+        GLib.idle_add(lambda: self.normalize_search_row_numbers(target_title, tree_view))
+
+    def normalize_search_row_numbers(self, target_title, tree_view):
+        """Enforces clean sequential 1,2,3... layout numbers and restores active selection tracks."""
+        focus_iter = None
+        TITLE_COLUMN = 1
+
         for idx, row in enumerate(self.list_store):
-            self.list_store[row.iter][0] = str(idx + 1)
-            #self.list_store.set_value(row.iter, 0, str(idx + 1))
+            # Clean update of the sequential numbering on screen (column 0)
+            self.list_store.set_value(row.iter, 0, str(idx + 1))
+            
+            # Identify the moved row based on the title
+            if target_title and row[TITLE_COLUMN] == target_title:
+                focus_iter = row.iter
+
+        # Restore focus and automatically scroll to the new position
+        if focus_iter:
+            tree_view.get_selection().select_iter(focus_iter)
+            path = self.list_store.get_path(focus_iter)
+            tree_view.scroll_to_cell(path, None, False, 0, 0)
+            
+        # Clear the temporary map variable
+        self.old_search_urls_map = []
         return False
+
 
     def on_delete_playlist_clicked(self, button):
         """Displays a confirmation dialog and permanently purges the selected playlist from local storage."""
@@ -582,37 +719,6 @@ class YouTubeInsidePlayer(Gtk.Window):
                         break
             else:
                 self.update_status(_("Playlist name already exists!"), "red", "dialog-warning")
-
-           
-    # --- PLAYLIST UI ACTIONS ---
-    def on_create_playlist_clicked(self, button):
-        dialog = Gtk.MessageDialog(transient_for=self, flags=0, message_type=Gtk.MessageType.QUESTION,
-                                   buttons=Gtk.ButtonsType.OK_CANCEL, text=_("Create New Playlist"))
-        dialog.format_secondary_text(_("Enter a unique name for your custom playlist:"))
-        box = dialog.get_content_area()
-        entry = Gtk.Entry()
-        entry.set_margin_top(10)
-        box.add(entry)
-        dialog.show_all()
-        
-        response = dialog.run()
-        name_text = entry.get_text().strip()
-        dialog.destroy()
-        
-        if response == Gtk.ResponseType.OK and name_text:
-            if name_text not in self.playlists:
-                self.playlists[name_text] = []
-                self.save_playlists()
-                self.populate_playlist_combo()
-                model = self.playlist_combo.get_model()
-                for idx in range(len(model)):
-                    if model[idx] == name_text:
-                        self.playlist_combo.set_active(idx)
-                        break
-            else:
-                self.update_status(_("Playlist name already exists!"), "red", "dialog-warning")
-
-
     ############################/
 
     def on_playlist_combo_changed(self, combo):
@@ -887,8 +993,6 @@ class YouTubeInsidePlayer(Gtk.Window):
                     
             time.sleep(0.4)
     #---###########################
-
-
     def play_next_video(self):
         """Finds the finished track by URL and safely plays the next row, ignoring UI selection shifts."""
         if self.active_playback_source == "search":
