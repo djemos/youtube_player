@@ -272,7 +272,8 @@ class YouTubeInsidePlayer(Gtk.Window):
 
         self.playlist_store = Gtk.ListStore(str, str) # Index, Video Title
         self.playlist_tree_view = Gtk.TreeView(model=self.playlist_store)
-        
+        # Disable search entry on list
+        self.playlist_tree_view.set_enable_search(False)
         
         self.playlist_tree_view.connect("drag-begin", self.on_playlist_drag_begin)
         # Initialize the variable to None
@@ -1087,7 +1088,6 @@ class YouTubeInsidePlayer(Gtk.Window):
             
             self.unfullscreen() 
             self.is_fullscreen = False
-
     ############################
 
     def on_video_clicked(self, widget, event):
