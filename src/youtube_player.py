@@ -852,11 +852,22 @@ class YouTubeInsidePlayer(Gtk.Window):
             payload_pause = json.dumps({"command": ["observe_property", 2, "pause"]}) + "\n"
             listener_socket.sendall(payload_pause.encode('utf-8'))
             
+            # NEW: Observe fullscreen state changes from MPV (triggered by default double clicks)
+            payload_fs = json.dumps({"command": ["observe_property", 3, "fullscreen"]}) + "\n"
+            listener_socket.sendall(payload_fs.encode('utf-8'))
+            
             # Continuous loop to read incoming JSON lines from MPV
             socket_file = listener_socket.makefile('r', encoding='utf-8')
             for line in socket_file:
                 try:
                     data = json.loads(line.strip())
+                    # --- NEW: Intercept double click event from MPV ---
+                    if data.get("event") == "client-message":
+                        args = data.get("args", [])
+                        if args and args[0] == "custom_toggle_fs":
+                            # Safely toggle fullscreen in the GTK Main Thread
+                            GLib.idle_add(self.toggle_fullscreen)
+                            
                     if data.get("event") == "property-change":
                         prop_name = data.get("name")
                         prop_value = data.get("data")
@@ -876,6 +887,13 @@ class YouTubeInsidePlayer(Gtk.Window):
                                 self.is_paused = is_mpv_paused
                                 # Safely update the button in the GTK Main Thread
                                 GLib.idle_add(self.update_pause_button_ui, is_mpv_paused)
+                                
+                        # NEW: Handle Fullscreen sync when user double clicks inside MPV
+                        elif prop_name == "fullscreen":
+                            is_mpv_fs = bool(prop_value)
+                            if is_mpv_fs != self.is_fullscreen:
+                                # Update Python flag and trigger your UI hide/show logic safely
+                                GLib.idle_add(self.toggle_fullscreen)                                
                                 
                 except Exception:
                     pass
@@ -1210,6 +1228,7 @@ class YouTubeInsidePlayer(Gtk.Window):
             
             self.unfullscreen() 
             self.is_fullscreen = False
+        return False
     ############################
 
     def on_video_clicked(self, widget, event):
