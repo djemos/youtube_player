@@ -86,6 +86,9 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.active_playback_source = "search" # "search" or "playlist"
         self.load_playlists()
 
+        # Connect global key press events to handle Spacebar anywhere in the window
+        self.connect("key-press-event", self.on_key_press_event)
+
         ###///////////////
 
         vbox_main = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -416,6 +419,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         # Connect Core Window Event Signals
         self.connect("key-release-event", self.on_key_release)
         self.connect("destroy", self.on_destroy)
+        
     # --- PLAYLIST CORE BACKEND LOGIC ---
     def load_playlists(self):
         """Read localized profiles inside persistent standard userspace directories."""
@@ -594,7 +598,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         else:
             self.dragged_search_item_title = None
 
-        # 💡 HERE IS THE SECRET: Lock the correct mapping before the screen UI updates!
+        # HERE IS THE SECRET: Lock the correct mapping before the screen UI updates!
         self.old_search_urls_map = []
         for idx in range(len(self.video_urls)):
             if idx < len(self.list_store):
@@ -720,7 +724,26 @@ class YouTubeInsidePlayer(Gtk.Window):
                         break
             else:
                 self.update_status(_("Playlist name already exists!"), "red", "dialog-warning")
-    ############################/
+                
+    def on_key_press_event(self, widget, event):
+        """Intercepts global key presses to handle the Spacebar for Pause/Play."""
+        from gi.repository import Gdk, Gtk
+        
+        # Check if the pressed key is the Spacebar
+        if event.keyval == Gdk.KEY_space:
+            # Check if the user is currently typing in an entry field (to avoid breaking search text)
+            focus_widget = self.get_focus()
+            if focus_widget and isinstance(focus_widget, Gtk.Entry):
+                return False # Allow normal typing inside search/text inputs
+                
+            # FIXED: Trigger the play/pause toggle by passing None to satisfy the required button argument
+            self.toggle_pause(None)
+            return True # Stop the event from propagating further (prevents song skipping)
+            
+        return False # Allow all other keys to behave normally
+
+               
+    ############################
 
     def on_playlist_combo_changed(self, combo):
         self.refresh_playlist_ui_view()
@@ -803,6 +826,102 @@ class YouTubeInsidePlayer(Gtk.Window):
                     client.sendall(payload.encode('utf-8'))
                     client.close()
                 except Exception: pass
+                
+    def start_mpv_listener(self):
+        """Opens a permanent connection with MPV once it becomes available."""
+        # Wait for MPV to create the socket file (30 attempts x 0.5s = 15 seconds max)
+        for i in range(30):
+            if hasattr(self, 'mpv_socket') and self.mpv_socket and os.path.exists(self.mpv_socket):
+                break
+            time.sleep(0.5)
+
+        # Silent exit if the socket file was not created in time
+        if not hasattr(self, 'mpv_socket') or not os.path.exists(self.mpv_socket):
+            return
+
+        try:
+            # Open a permanent background connection (Listener socket)
+            listener_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            listener_socket.connect(self.mpv_socket)
+            
+            # 1. Enable observation for the 'volume' property
+            payload_vol = json.dumps({"command": ["observe_property", 1, "volume"]}) + "\n"
+            listener_socket.sendall(payload_vol.encode('utf-8'))
+            
+            # 2. Enable observation for the 'pause' property
+            payload_pause = json.dumps({"command": ["observe_property", 2, "pause"]}) + "\n"
+            listener_socket.sendall(payload_pause.encode('utf-8'))
+            
+            # Continuous loop to read incoming JSON lines from MPV
+            socket_file = listener_socket.makefile('r', encoding='utf-8')
+            for line in socket_file:
+                try:
+                    data = json.loads(line.strip())
+                    if data.get("event") == "property-change":
+                        prop_name = data.get("name")
+                        prop_value = data.get("data")
+                        
+                        # Handle volume updates from MPV
+                        if prop_name == "volume":
+                            mpv_volume = int(prop_value if prop_value is not None else 0)
+                            if mpv_volume != self.current_volume:
+                                self.current_volume = mpv_volume
+                                # Safely update the slider in the GTK Main Thread
+                                GLib.idle_add(self.update_slider_ui, mpv_volume)
+                        
+                        # Handle pause state updates from MPV
+                        elif prop_name == "pause":
+                            is_mpv_paused = bool(prop_value)
+                            if is_mpv_paused != self.is_paused:
+                                self.is_paused = is_mpv_paused
+                                # Safely update the button in the GTK Main Thread
+                                GLib.idle_add(self.update_pause_button_ui, is_mpv_paused)
+                                
+                except Exception:
+                    pass
+        except Exception:
+            # Silent handling of unexpected disconnection when MPV closes or switches video
+            pass
+
+    def update_pause_button_ui(self, is_paused):
+        """Safely updates the Pause button appearance based on MPV's playback state."""
+        if is_paused:
+            self.img_pause.set_from_icon_name("media-playback-start", Gtk.IconSize.BUTTON)
+            self.lbl_pause.set_text(_("Resume"))
+        else:
+            self.img_pause.set_from_icon_name("media-playback-pause", Gtk.IconSize.BUTTON)
+            self.lbl_pause.set_text(_("Pause"))
+        return False  # Required by GLib.idle_add to execute only once
+
+    def toggle_pause(self, widget=None):
+        """Triggered when the user clicks the Pause button in the GUI."""
+        # Flip the current pause state
+        self.is_paused = not self.is_paused
+        
+        # Send the updated property to MPV via the standard command method
+        self.send_mpv_ipc_command(["set_property", "pause", self.is_paused])
+        
+        # Instantly update the local UI appearance
+        self.update_pause_button_ui(self.is_paused)
+
+    def update_slider_ui(self, value):
+        """Safely updates the slider without causing an infinite loop."""
+        self.updating_from_mpv = True  # Enable lock
+        self.volume_slider.set_value(value)
+        self.updating_from_mpv = False # Disable lock
+        return False  # Required for GLib.idle_add
+
+
+    def on_volume_changed(self, widget):
+        """When the user moves the slider in the GUI with the mouse."""
+        if self.updating_from_mpv:
+            return  # If the change originated from the MPV, we do not send a command back.
+
+        new_volume = int(widget.get_value())
+        if self.current_volume != new_volume:
+            self.current_volume = new_volume
+            self.send_mpv_ipc_command(["set_property", "volume", self.current_volume])
+   
     #########################
 
     def send_mpv_ipc_query(self, cmd_list):
@@ -960,6 +1079,7 @@ class YouTubeInsidePlayer(Gtk.Window):
             "--script-opts=osc-visibility=always",
             f"--input-ipc-server={self.mpv_socket}",
             f"--volume={int(self.current_volume)}",
+            "--volume-max=100",
             "--force-window=yes",
             url
         ]
@@ -973,6 +1093,8 @@ class YouTubeInsidePlayer(Gtk.Window):
             self.update_status(f"{_('Playing:')} {title}", icon_name="media-playback-start")
             self.ipc_thread_active = True
             threading.Thread(target=self.monitor_mpv_playback, daemon=True).start()
+            # NEW LINE: We’re also starting our own thread to monitor the sound volume.
+            threading.Thread(target=self.start_mpv_listener, daemon=True).start()
         except Exception:
             self.update_status(_("Failed to start playback."), "red", icon_name="dialog-error")
         return False
