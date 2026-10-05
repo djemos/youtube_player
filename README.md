@@ -1,8 +1,8 @@
 # youtube_player (YouTube Music & Video Player)  
 An advanced, thread-safe embedded player for YouTube videos and music with standalone download support.  
-
-To download and create the package type: 
-
+  
+To download and create the package type:   
+  
 mkdir build  
 cd build  
 git clone https://github.com/djemos/youtube_player.git  
