@@ -12,6 +12,9 @@ fakeroot slkbuild -X
 To install the package type:
 sudo spkg youtube_player-3.0-noarch-1dj.txz
 
+
+![youtube](https://github.com/user-attachments/assets/11b1c136-d466-4857-b86b-a0abbdfde253)
+
 Copyright (C) 2026 Dimitris Tzemos <dijemos@gmail.com>
 This program is free software: you can redistribute it and/or modify it under the terms 
 of the GNU General Public License as published by the Free Software Foundation, 
@@ -23,6 +26,5 @@ See the GNU General Public License at <http://www.gnu.org/licenses/> for more de
 
 
 
-![youtube](https://github.com/user-attachments/assets/11b1c136-d466-4857-b86b-a0abbdfde253)
 
 
