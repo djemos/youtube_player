@@ -20,6 +20,7 @@ To install the package type:
 sudo spkg youtube_player-3.0-noarch-1dj.txz
 
 
+
 <img width="1342" height="683" alt="Image" src="https://github.com/user-attachments/assets/8e3187a6-f949-4740-b885-ec10a0b5b85c" />
 
 
