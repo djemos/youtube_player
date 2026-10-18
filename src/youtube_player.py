@@ -419,8 +419,69 @@ class YouTubeInsidePlayer(Gtk.Window):
         # Connect Core Window Event Signals
         self.connect("key-release-event", self.on_key_release)
         self.connect("destroy", self.on_destroy)
+        #########################################
+        # Ενεργοποίηση καταγραφής κίνησης ποντικιού
+        self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
         
+        # Σύνδεση των απαραίτητων signals
+        self.connect("window-state-event", self.on_window_state_changed)
+        self.connect("motion-notify-event", self.on_mouse_move)
+        
+        # Αρχικοποίηση μεταβλητών
+        self.fullscreen_timeout_id = None
 
+    def on_window_state_changed(self, widget, event):
+        # Check whether the application has entered or exited full-screen mode
+        self.is_fullscreen = bool(event.new_window_state & Gdk.WindowState.FULLSCREEN)
+        
+        if not self.is_fullscreen:
+            # If we exit full screen, we cancel the timer and display the ENTIRE UI again.
+            if self.fullscreen_timeout_id:
+                GLib.source_remove(self.fullscreen_timeout_id)
+                self.fullscreen_timeout_id = None
+                
+            self.search_box.show()
+            if self.scroll_window.get_parent():
+                self.scroll_window.get_parent().show()
+            if hasattr(self, 'playlist_panel_vbox'):
+                self.playlist_panel_vbox.show()
+            if hasattr(self, 'bottom_box'):
+                self.bottom_box.show()
+        else:
+            # As soon as it enters full screen, we immediately hide everything.
+            self.search_box.hide()
+            if self.scroll_window.get_parent():
+                self.scroll_window.get_parent().hide()
+            if hasattr(self, 'playlist_panel_vbox'):
+                self.playlist_panel_vbox.hide()
+            if hasattr(self, 'bottom_box'):
+                self.bottom_box.hide()
+
+    def on_mouse_move(self, widget, event):
+        if self.is_fullscreen:
+            # When the mouse is moved, we display ONLY the bottom part (controls)
+            if hasattr(self, 'bottom_box'):
+                self.bottom_box.show()
+            
+            # We are cancelling the previous timer so that it doesn't shut off prematurely.
+            if self.fullscreen_timeout_id:
+                GLib.source_remove(self.fullscreen_timeout_id)
+            
+            # We start a new timer to hide the bottom section after 2 seconds of inactivity.
+            self.fullscreen_timeout_id = GLib.timeout_add(2000, self.hide_fullscreen_panels_callback)
+            
+        return False
+
+    def hide_fullscreen_panels_callback(self):
+        # If the mouse stops moving in full-screen mode, we hide the bottom section again.
+        if self.is_fullscreen and hasattr(self, 'bottom_box'):
+            self.bottom_box.hide()
+        
+        self.fullscreen_timeout_id = None
+        return False
+
+
+    #######################################
 
     def show_fullscreen_hint(self):
         # Show the label
@@ -611,7 +672,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         else:
             self.dragged_search_item_title = None
 
-        # HERE IS THE SECRET: Lock the correct mapping before the screen UI updates!
+        # Lock the correct mapping before the screen UI updates!
         self.old_search_urls_map = []
         for idx in range(len(self.video_urls)):
             if idx < len(self.list_store):
@@ -776,7 +837,7 @@ class YouTubeInsidePlayer(Gtk.Window):
             self.save_playlists()
             self.refresh_playlist_ui_view()
             
-            # FIXED STRING: Replaced the non-standard emoji layout token with a clean native standard text identifier
+            # Replaced the non-standard emoji layout token with a clean native standard text identifier
             success_msg = f"[+] '{title[:30]}' {_('added to')} {active_list_name}!"
             self.update_status(success_msg, "green", "dialog-information")
 
@@ -865,7 +926,7 @@ class YouTubeInsidePlayer(Gtk.Window):
             payload_pause = json.dumps({"command": ["observe_property", 2, "pause"]}) + "\n"
             listener_socket.sendall(payload_pause.encode('utf-8'))
             
-            # NEW: Observe fullscreen state changes from MPV (triggered by default double clicks)
+            # Observe fullscreen state changes from MPV (triggered by default double clicks)
             payload_fs = json.dumps({"command": ["observe_property", 3, "fullscreen"]}) + "\n"
             listener_socket.sendall(payload_fs.encode('utf-8'))
             
@@ -1104,6 +1165,7 @@ class YouTubeInsidePlayer(Gtk.Window):
             "--vo=gpu",
             "--gpu-context=x11egl",
             "--input-vo-keyboard=no",
+            #"--input-cursor=no", 
             "--keep-open=yes",           
             "--idle=yes",                
             "--osc=yes",
@@ -1344,7 +1406,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         GLib.idle_add(self.fullscreen_button.set_sensitive, False)
         GLib.idle_add(self.pause_button.set_sensitive, False)
         
-        # FIXED: Keeps Play active if there is any track available in search OR playlist memory arrays
+        # Keeps Play active if there is any track available in search OR playlist memory arrays
         if self.video_urls or self.current_playlist_videos:
             GLib.idle_add(self.play_button.set_sensitive, True)
         else:
