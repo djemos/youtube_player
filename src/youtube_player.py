@@ -199,7 +199,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.video_overlay.add(self.video_container)
         
         self.fs_info_label = Gtk.Label()
-        fs_label_text = _("DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN")
+        fs_label_text = _("DOUBLE CLICK OR PRESS ESC OR F TO EXIT FULL SCREEN")
         self.fs_info_label.set_markup(f"<span background='#222222' foreground='#3584e4' size='medium'><b> {fs_label_text} </b></span>")
         self.fs_info_label.set_valign(Gtk.Align.START)
         self.fs_info_label.set_halign(Gtk.Align.CENTER)
