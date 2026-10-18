@@ -420,6 +420,19 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.connect("key-release-event", self.on_key_release)
         self.connect("destroy", self.on_destroy)
         
+
+
+    def show_fullscreen_hint(self):
+        # Show the label
+        self.fs_info_label.show()
+    
+        # Automatically hide after 3000 milliseconds (3 seconds)
+        GLib.timeout_add(3000, self._hide_fullscreen_hint)
+
+    def _hide_fullscreen_hint(self):
+        self.fs_info_label.hide()
+        return False # Returns False so the timer does not repeat
+        
     # --- PLAYLIST CORE BACKEND LOGIC ---
     def load_playlists(self):
         """Read localized profiles inside persistent standard userspace directories."""
@@ -1094,7 +1107,8 @@ class YouTubeInsidePlayer(Gtk.Window):
             "--keep-open=yes",           
             "--idle=yes",                
             "--osc=yes",
-            "--script-opts=osc-visibility=always",
+            #"--script-opts=osc-visibility=always",
+            "--script-opts=osc-visibility=auto",
             f"--input-ipc-server={self.mpv_socket}",
             f"--volume={int(self.current_volume)}",
             "--volume-max=100",
@@ -1216,9 +1230,8 @@ class YouTubeInsidePlayer(Gtk.Window):
             
             self.fullscreen() 
             self.is_fullscreen = True
-            self.fs_info_label.show() 
+            self.show_fullscreen_hint()
         else:
-            self.fs_info_label.hide() 
             self.search_box.show()
             self.scroll_window.show()
             self.add_to_playlist_btn.show()
