@@ -11,7 +11,7 @@ tar -cvjSf youtube_player.tar.bz2 youtube_player
 fakeroot slkbuild -X  
   
 To install the package type:  
-sudo spkg youtube_player-3.0-noarch-1dj.txz  
+sudo spkg youtube_player-4.0-noarch-1dj.txz  
 
 
 
