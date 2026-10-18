@@ -89,7 +89,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         # Connect global key press events to handle Spacebar anywhere in the window
         self.connect("key-press-event", self.on_key_press_event)
 
-        ###///////////////
+        ###############################
 
         vbox_main = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         self.add(vbox_main)
@@ -191,7 +191,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.video_overlay = Gtk.Overlay()
         self.video_event_box.add(self.video_overlay)
 
-        ####///////////////////
+        ##########################
        
         self.video_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.video_container.set_size_request(500, 380)
@@ -292,7 +292,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         # Track last click interaction focus states
         self.playlist_tree_view.connect("button-press-event", lambda w, e: setattr(self, 'last_clicked_view', 'playlist') or False)
 
-        # CONNECT THIS NEW SIGNAL: Tracks selection changes inside the playlist View pipeline
+        # Tracks selection changes inside the playlist View pipeline
         self.playlist_tree_view.get_selection().connect("changed", self.on_playlist_selection_changed)
         
         self.playlist_scroll.add(self.playlist_tree_view)
@@ -305,7 +305,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         col_pl_title.set_expand(True)
         self.playlist_tree_view.append_column(col_pl_title)
 
-        # Action Button A: Remove Selected Track using a native system icon
+        # Remove Selected Track using a native system icon
         self.remove_from_playlist_btn = Gtk.Button()
         btn_remove_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         img_remove = Gtk.Image.new_from_icon_name("list-remove", Gtk.IconSize.BUTTON)
@@ -317,7 +317,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.remove_from_playlist_btn.connect("clicked", self.on_remove_track_clicked)
         self.playlist_panel_vbox.pack_start(self.remove_from_playlist_btn, False, False, 0)
 
-        # Action Button B: Delete Entire Playlist Profile (Positioned perfectly under Remove Track)
+        # Delete Entire Playlist Profile (Positioned perfectly under Remove Track)
         self.delete_playlist_btn = Gtk.Button()
         btn_del_list_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         img_del_list = Gtk.Image.new_from_icon_name("list-remove", Gtk.IconSize.BUTTON)
@@ -330,7 +330,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.playlist_panel_vbox.pack_start(self.delete_playlist_btn, False, False, 0)
 
         self.populate_playlist_combo()
-        # 3. Bottom section: Controls & Status Frame Bar
+        # Bottom section: Controls & Status Frame Bar
         self.bottom_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         vbox_main.pack_start(self.bottom_box, False, False, 0)
         
@@ -382,7 +382,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.download_video_button.set_sensitive(False)
         self.buttons_row.pack_start(self.download_video_button, False, False, 0)
 
-        #####//////////////////////
+        ###############################
         
         self.about_button = Gtk.Button()
         btn_about_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
@@ -420,14 +420,14 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.connect("key-release-event", self.on_key_release)
         self.connect("destroy", self.on_destroy)
         #########################################
-        # Ενεργοποίηση καταγραφής κίνησης ποντικιού
+        # Enable mouse movement recording
         self.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
         
-        # Σύνδεση των απαραίτητων signals
+        # Connecting the necessary signals
         self.connect("window-state-event", self.on_window_state_changed)
         self.connect("motion-notify-event", self.on_mouse_move)
         
-        # Αρχικοποίηση μεταβλητών
+        # Variable initialization
         self.fullscreen_timeout_id = None
 
     def on_window_state_changed(self, widget, event):
