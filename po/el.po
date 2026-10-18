@@ -42,8 +42,8 @@ msgid "Add Selected to Playlist"
 msgstr "Προσθήκη Επιλεγμένου στην Λίστα"
 
 #: youtube_player.py:195
-msgid "DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN"
-msgstr "ΔΙΠΛΟ ΚΛΙΚ ΕΔΩ Η ΠΑΤΗΣΤΕ ESC Η F ΓΙΑ ΕΞΟΔΟ ΑΠΟ ΠΛΗΡΗ ΟΘΟΝΗ"
+msgid "DOUBLE CLICK OR PRESS ESC OR F TO EXIT FULL SCREEN"
+msgstr "ΔΙΠΛΟ ΚΛΙΚ Η ΠΑΤΗΣΤΕ ESC Η F ΓΙΑ ΕΞΟΔΟ ΑΠΟ ΠΛΗΡΗ ΟΘΟΝΗ"
 
 #: youtube_player.py:212 youtube_player.py:840 youtube_player.py:959
 #: youtube_player.py:1095
