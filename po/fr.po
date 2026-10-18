@@ -42,9 +42,9 @@ msgid "Add Selected to Playlist"
 msgstr "Ajouter la Sélection à la Playlist"
 
 #: youtube_player.py:195
-msgid "DOUBLE CLICK HERE OR PRESS ESC OR F TO EXIT FULL SCREEN"
+msgid "DOUBLE CLICK OR PRESS ESC OR F TO EXIT FULL SCREEN"
 msgstr ""
-"DOUBLE-CLIQUER ICI OU APPUYER SUR ESC OU F POUR QUITTER LE MODE PLEIN ÉCRAN"
+"DOUBLE-CLIQUER OU APPUYER SUR ESC OU F POUR QUITTER LE MODE PLEIN ÉCRAN"
 
 #: youtube_player.py:212 youtube_player.py:840 youtube_player.py:959
 #: youtube_player.py:1095
