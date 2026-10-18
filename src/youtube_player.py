@@ -1051,7 +1051,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.list_store.clear()
         self.video_urls = []
         self.stop_playback()
-        self.update_status(_("Searching YouTube (fetching 150 items)..."), icon_name="edit-find")
+        self.update_status(f"Searching YouTube (fetching {MAX_RESULTS} items)...", icon_name="edit-find")
         threading.Thread(target=self.fetch_youtube_results, args=(user_input,), daemon=True).start()
 
     def fetch_youtube_results(self, phrase):
