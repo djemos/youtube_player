@@ -1351,7 +1351,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         about = Gtk.AboutDialog()
         about.set_transient_for(self) 
         about.set_program_name(_("YouTube Music & Video Player"))
-        about.set_version("3.0")
+        about.set_version("5.0")
         about.set_copyright("Copyright © 2026 Dimitris Tzemos <dijemos@gmail.com>")
         about.set_comments(_("An advanced, thread-safe embedded player for YouTube videos and music with standalone download support."))
         about.set_website("https://github.com/djemos/youtube_player")
@@ -1370,31 +1370,153 @@ class YouTubeInsidePlayer(Gtk.Window):
             url, title = self.get_selected_playlist_url()
 
         if url:
+            dialog = Gtk.FileChooserDialog(
+                title=_("Select Download Folder"),
+                parent=self,
+                action=Gtk.FileChooserAction.SELECT_FOLDER
+            )
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OPEN, Gtk.ResponseType.OK
+        )
+        default_dir = os.path.expanduser("~/Downloads")
+        if os.path.exists(default_dir):
+            dialog.set_current_folder(default_dir)
+        response = dialog.run()
+        download_dir = None
+        
+        if response == Gtk.ResponseType.OK:
+            download_dir = dialog.get_filename()
+            
+        dialog.destroy()  # Always destroy the dialog after usage
+        
+        # 2. Only proceed if the user actually picked a folder
+        if download_dir:
             self.download_button.set_sensitive(False)
             self.download_video_button.set_sensitive(False)
             self.update_status(f"{_('Started downloading')} {file_type.upper()}: {title[:25]}...", icon_name="folder-download")
-            threading.Thread(target=self.download_thread, args=(url, title, file_type), daemon=True).start()
-
-    def download_thread(self, url, title, file_type):
-        try:
-            download_dir = os.path.expanduser("~/Downloads")
-            if not os.path.exists(download_dir): download_dir = os.path.expanduser("~")
             
+            # Pass download_dir as the 4th argument here:
+            threading.Thread(
+                target=self.download_thread, 
+                args=(url, title, file_type, download_dir), 
+                daemon=True
+            ).start()
+            
+
+    def on_download_clicked(self, url, file_type, title):
+        # Create the File Chooser Dialog for FOLDER selection
+        dialog = Gtk.FileChooserDialog(
+            title=_("Select Download Folder"),
+            parent=self,
+            action=Gtk.FileChooserAction.SELECT_FOLDER
+        )
+        # Add navigation buttons
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OPEN, Gtk.ResponseType.OK
+        )
+    
+        # Set default folder to ~/Downloads if it exists
+        default_dir = os.path.expanduser("~/Downloads")
+        if os.path.exists(default_dir):
+            dialog.set_current_folder(default_dir)
+        
+        response = dialog.run()
+        download_dir = None
+    
+        if response == Gtk.ResponseType.OK:
+            download_dir = dialog.get_filename() # Capture selected path
+        
+        dialog.destroy() # Close the dialog box safely
+    
+        # If the user selected a folder, disable buttons and start the thread
+        if download_dir:
+            self.download_button.set_sensitive(False)
+            self.download_video_button.set_sensitive(False)
+        
+            import threading
+            threading.Thread(
+                target=self.download_thread, 
+                args=(url, title, file_type, download_dir), 
+                daemon=True
+            ).start()
+
+    """
+    ==================================================================================================================================
+                                                   MP4 VIDEO DOWNLOAD PROFILES
+    ==================================================================================================================================
+    Feature               bestvideo+bestaudio/best (Option A)             bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] (Option B)
+    ----------------------------------------------------------------------------------------------------------------------------------
+    Video Quality         Perfect (1080p VP9)                             Perfect (1080p VP9)
+    Audio Quality         Perfect (131 kbps Opus)                         Perfect (137 kbps Opus)
+    Download Speed        Slow (Waits for ffmpeg at the end)              Blazing Fast (Downloads fully pre-merged)
+    Processing (Merge)    Delayed (Forces a remux of Opus into MP4)       Instant / None (The file is ready immediately)
+    SMPlayer Metadata     Triggers a Bug (0 kbps shown for video)         Correct Metadata (Correctly displays 3344 kbps)
+    ==================================================================================================================================
+    
+    ==================================================================================================================================
+                                                   MP3 AUDIO DOWNLOAD PROFILES
+    ==================================================================================================================================
+    Feature               "--audio-quality", "0" (VBR Option)             "--audio-quality", "320K" (CBR Option)
+    ----------------------------------------------------------------------------------------------------------------------------------
+    Audio Fidelity        Excellent (Matches source limits)               Excellent (Matches source limits)
+    Bitrate Behavior      Variable (Changes dynamically ~236-245 kbps)    Constant (Locked strictly at 320 kbps)
+    File Size             Optimized (Smaller footprint, ~6 MB / 3-min)    Maximum (Larger footprint, ~7.5 MB / 3-min)
+    Encoding Speed        Fast (Standard variable compression pass)       Fast (Standard constant allocation pass)
+    SMPlayer Metadata     Displays actual average bitrate (e.g., 236 kbps) Displays a locked, clean 320 kbps tag
+    ==================================================================================================================================
+    """
+    
+    def download_thread(self, url, title, file_type, download_dir):
+        try:
             if file_type == "mp3":
-                cmd = ["yt-dlp", "--no-cache-dir", "-x", "--audio-format", "mp3", "--audio-quality", "0", "-o", f"{download_dir}/%(title)s.%(ext)s", url]
+                # Maximum 320kbps CBR Audio Quality
+                cmd = [
+                    "yt-dlp", 
+                    "--no-cache-dir", 
+                    "-f", "bestaudio/best",
+                    "-x", 
+                    "--audio-format", "mp3", 
+                    # "0" enables Variable Bitrate (VBR) at the highest quality (~245 kbps).
+                    # It changes bitrate dynamically based on audio complexity to save file space.
+                    "--audio-quality", "0",
+                    
+                    # "320K" forces a Constant Bitrate (CBR) locked at exactly 320 kbps.
+                    # It produces larger file sizes but shows a clean 320 kbps tag in players.
+                    #"--audio-quality", "320K",
+
+                    "-o", f"{download_dir}/%(title)s.%(ext)s", 
+                    url
+                ]
             else:
-                cmd = ["yt-dlp", "--no-cache-dir", "-f", "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]", "-o", f"{download_dir}/%(title)s.%(ext)s", url]
-                
+                # It downloads the best video quality (4K/8K) and saves it, by default, in MP4 format.
+                cmd = [
+                    "yt-dlp", 
+                    "--no-cache-dir", 
+                    # It downloads the best video quality (4K/8K) and saves it, by default, in MP4 format.
+                    #"-f", "bestvideo+bestaudio/best", 
+                    #"--merge-output-format", "mp4",
+                    
+                    # Fastest Video Download (1080p MP4) with instant data merging
+                    "-f", "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]",
+                    
+                    "-o", f"{download_dir}/%(title)s.%(ext)s", 
+                    url
+                ]
+
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             if result.returncode == 0:
-                self.update_status(f"{_('Download completed inside')} ~/Downloads!", "green", icon_name="emblem-ok")
+                # Display the dynamically selected folder path in the status message
+               self.update_status(f"{_('Download completed inside')} {download_dir}!", "green", icon_name="emblem-ok")
             else:
                 self.update_status(_("Download failed. Make sure ffmpeg is installed."), "red", icon_name="dialog-error")
         except Exception:
             self.update_status(_("Error during download process."), "red", icon_name="dialog-error")
-            
+        
         GLib.idle_add(self.download_button.set_sensitive, True)
         GLib.idle_add(self.download_video_button.set_sensitive, True)
+
 
     def stop_playback(self):
         self.ipc_thread_active = False 
