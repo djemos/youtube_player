@@ -429,25 +429,37 @@ class YouTubeInsidePlayer(Gtk.Window):
         
         # Variable initialization
         self.fullscreen_timeout_id = None
-
+        self.is_fullscreen = False
+        
     def on_window_state_changed(self, widget, event):
         # Check whether the application has entered or exited full-screen mode
         self.is_fullscreen = bool(event.new_window_state & Gdk.WindowState.FULLSCREEN)
         
         if not self.is_fullscreen:
             # If we exit full screen, we cancel the timer and display the ENTIRE UI again.
+            self.set_border_width(12)
+            if hasattr(self, 'video_container'):
+                self.video_container.set_border_width(14)
+            
             if self.fullscreen_timeout_id:
                 GLib.source_remove(self.fullscreen_timeout_id)
                 self.fullscreen_timeout_id = None
-                
-            self.search_box.show()
+                self.search_box.show()
             if self.scroll_window.get_parent():
                 self.scroll_window.get_parent().show()
             if hasattr(self, 'playlist_panel_vbox'):
                 self.playlist_panel_vbox.show()
             if hasattr(self, 'bottom_box'):
                 self.bottom_box.show()
+            
+            # ΕΠΑΝΑΦΟΡΑ ΤΟΥ STATUS BOX ΟΤΑΝ ΒΓΑΙΝΟΥΜΕ ΑΠΟ FULLSCREEN
+            if hasattr(self, 'status_box'):
+                self.status_box.show()
         else:
+            self.set_border_width(0)
+            if hasattr(self, 'video_container'):
+               self.video_container.set_border_width(0)
+               
             # As soon as it enters full screen, we immediately hide everything.
             self.search_box.hide()
             if self.scroll_window.get_parent():
@@ -456,6 +468,11 @@ class YouTubeInsidePlayer(Gtk.Window):
                 self.playlist_panel_vbox.hide()
             if hasattr(self, 'bottom_box'):
                 self.bottom_box.hide()
+            
+            # ΚΡΥΨΙΜΟ ΤΟΥ STATUS BOX ΜΑΖΙ ΜΕ ΤΑ MARGINS ΤΟΥ ΣΕ FULLSCREEN
+            if hasattr(self, 'status_box'):
+                self.status_box.hide()
+
 
     def on_mouse_move(self, widget, event):
         if self.is_fullscreen:
@@ -485,7 +502,9 @@ class YouTubeInsidePlayer(Gtk.Window):
 
     def show_fullscreen_hint(self):
         # Show the label
-        self.fs_info_label.show()
+        #self.fs_info_label.show()
+        self.fs_info_label.hide()
+        
     
         # Automatically hide after 3000 milliseconds (3 seconds)
         GLib.timeout_add(3000, self._hide_fullscreen_hint)
