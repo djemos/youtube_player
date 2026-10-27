@@ -1,4 +1,4 @@
-# (YouTube application for news, Music & Video Player ad-free)
+# (YouTube application player ad-free for news, Music & Video)
 An advanced, thread-safe embedded player for YouTube news, videos and music with standalone download support.
   
 To download and create the package type:   
