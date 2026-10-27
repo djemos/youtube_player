@@ -1,5 +1,5 @@
-# youtube_player ad-free (YouTube news, Music & Video Player)  
-An advanced, thread-safe embedded player for YouTube news, videos and music with standalone download support.  
+# (YouTube application for news, Music & Video Player ad-free)
+An advanced, thread-safe embedded player for YouTube news, videos and music with standalone download support.
   
 To download and create the package type:   
   
