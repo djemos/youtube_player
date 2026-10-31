@@ -4,7 +4,9 @@ install -d -m 755 $DESTDIR/usr/bin/
 install -d -m 755 $DESTDIR/usr/share/pixmaps
 install -d -m 755 $DESTDIR/usr/share/applications
 install -m 644 youtube_player.desktop $DESTDIR/usr/share/applications/
-install -m 755 src/youtube_player.py $DESTDIR/usr/bin/ 
+install -m 755 src/youtube_player.py $DESTDIR/usr/bin/
+install -m 755 src/convert_playlists_app_to_web.py $DESTDIR/usr/bin/
+install -m 755 src/convert_playlists_web_to_app.py $DESTDIR/usr/bin/
 install -m 755 src/yt-dlp $DESTDIR/usr/bin/ 
 install -m 644 src/youtube_player.png $DESTDIR/usr/share/pixmaps/
 
