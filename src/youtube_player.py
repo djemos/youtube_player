@@ -9,10 +9,14 @@ import json
 import time
 import os
 import socket
+import logging
 
 # Internationalization Setup
 import locale
 import gettext
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 APP_NAME = "youtube_player" 
 
@@ -329,6 +333,43 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.delete_playlist_btn.connect("clicked", self.on_delete_playlist_clicked)
         self.playlist_panel_vbox.pack_start(self.delete_playlist_btn, False, False, 0)
 
+        # Export Playlists Profile Component
+        self.export_playlists_btn = Gtk.Button()
+        btn_export_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        img_export = Gtk.Image.new_from_icon_name("document-save-as", Gtk.IconSize.BUTTON)
+        lbl_export = Gtk.Label(label=_("Export Playlists"))
+        btn_export_box.pack_start(img_export, False, False, 0)
+        btn_export_box.pack_start(lbl_export, False, False, 0)
+        self.export_playlists_btn.add(btn_export_box)
+        
+        self.export_playlists_btn.connect("clicked", self.on_export_playlists_clicked)
+        self.playlist_panel_vbox.pack_start(self.export_playlists_btn, False, False, 0)
+
+        # Import Playlists Profile Component
+        self.import_playlists_btn = Gtk.Button()
+        btn_import_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        img_import = Gtk.Image.new_from_icon_name("document-open", Gtk.IconSize.BUTTON)
+        lbl_import = Gtk.Label(label=_("Import Playlists"))
+        btn_import_box.pack_start(img_import, False, False, 0)
+        btn_import_box.pack_start(lbl_import, False, False, 0)
+        self.import_playlists_btn.add(btn_import_box)
+        
+        self.import_playlists_btn.connect("clicked", self.on_import_playlists_clicked)
+        self.playlist_panel_vbox.pack_start(self.import_playlists_btn, False, False, 0)
+        
+        # Rename Active Playlist Profile (Positioned perfectly under Delete Playlist)
+        self.rename_playlist_btn = Gtk.Button()
+        btn_rename_list_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        img_rename_list = Gtk.Image.new_from_icon_name("edit-copy", Gtk.IconSize.BUTTON) # standard native edit icon
+        lbl_rename_list = Gtk.Label(label=_("Rename Playlist"))
+        btn_rename_list_box.pack_start(img_rename_list, False, False, 0)
+        btn_rename_list_box.pack_start(lbl_rename_list, False, False, 0)
+        self.rename_playlist_btn.add(btn_rename_list_box)
+        
+        self.rename_playlist_btn.connect("clicked", self.on_rename_playlist_clicked)
+        self.playlist_panel_vbox.pack_start(self.rename_playlist_btn, False, False, 0)
+
+
         self.populate_playlist_combo()
         # Bottom section: Controls & Status Frame Bar
         self.bottom_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -555,6 +596,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.refresh_playlist_ui_view()
         
     def refresh_playlist_ui_view(self):
+        """Refreshes the TreeView layout using the dictionary structure (url & title)."""
         # Temporarily disconnect change signals to prevent them from triggering during Clear/Append
         try:
             self.playlist_store.disconnect_by_func(self.on_playlist_row_reordered)
@@ -564,13 +606,30 @@ class YouTubeInsidePlayer(Gtk.Window):
         self.playlist_store.clear()
         self.current_playlist_videos = []
         active_list_name = self.playlist_combo.get_active_text()
-        if active_list_name and active_list_name in self.playlists:
-            self.current_playlist_videos = self.playlists[active_list_name]
-            for idx, item in enumerate(self.current_playlist_videos):
-                self.playlist_store.append([str(idx + 1), item["title"]])
         
-        # Reconnect the signal that catches Drag and Drop (row-deleted is emitted at the end of the move)
-        self.playlist_store.connect("row-deleted", self.on_playlist_row_reordered)
+        if active_list_name and active_list_name in self.playlists:
+            # Φορτώνει τη λίστα με τα λεξικά (π.χ. [{'url': '...', 'title': '...'}])
+            self.current_playlist_videos = self.playlists[active_list_name]
+            
+            for idx, item in enumerate(self.current_playlist_videos):
+                # 1. Έλεγχος αν το item είναι dictionary (όπως η δομή της "μπελου")
+                if isinstance(item, dict) and "title" in item:
+                    title_text = item["title"]
+                # 2. Fallback αν βρεθεί παλιό string μορφότυπο
+                elif isinstance(item, str):
+                    title_text = item
+                else:
+                    title_text = _("Unknown Track")
+
+                # Προσθήκη στην οθόνη του GTK TreeView (Αύξων αριθμός, Τίτλος τραγουδιού)
+                self.playlist_store.append([str(idx + 1), title_text])
+        
+        # Reconnect the signal that catches Drag and Drop
+        try:
+            self.playlist_store.connect("row-deleted", self.on_playlist_row_reordered)
+        except Exception:
+            pass
+
 
     def on_playlist_row_reordered(self, model, path):
         """Triggered automatically when a playlist row is reordered via drag and drop."""
@@ -1351,7 +1410,7 @@ class YouTubeInsidePlayer(Gtk.Window):
         about = Gtk.AboutDialog()
         about.set_transient_for(self) 
         about.set_program_name(_("YouTube Music & Video Player"))
-        about.set_version("5.0")
+        about.set_version("6.0")
         about.set_copyright("Copyright © 2026 Dimitris Tzemos <dijemos@gmail.com>")
         about.set_comments(_("An advanced, thread-safe embedded player for YouTube videos and music with standalone download support."))
         about.set_website("https://github.com/djemos/youtube_player")
@@ -1597,12 +1656,381 @@ class YouTubeInsidePlayer(Gtk.Window):
             self.stop_playback()
             self.active_playback_source = "playlist"
             threading.Thread(target=self.play_video, args=(url, title), daemon=True).start()
+        
+    def save_playlists(self):
+        """Write profiles structural dumps down to local storage blocks safely."""
+        # Check if PLAYLISTS_FILE is defined as a global variable, fallback to default if not
+        playlists_file = globals().get('PLAYLISTS_FILE', 'playlists.json')
+        temp_file = f"{playlists_file}.tmp"
+        try:
+            with open(temp_file, 'w', encoding='utf-8') as f:
+                json.dump(self.playlists, f, ensure_ascii=False, indent=4)
+            os.replace(temp_file, playlists_file)
+            logger.info("Playlists saved successfully.")
+        except Exception as e:
+            logger.error(f"Failed to save playlists locally: {e}")
+
+    def export_playlists(self, target_path):
+        """Export current playlists dictionary to an external custom location."""
+        temp_file = f"{target_path}.tmp"
+        try:
+            destination_dir = os.path.dirname(target_path)
+            if destination_dir:
+                os.makedirs(destination_dir, exist_ok=True)
+            
+            with open(temp_file, 'w', encoding='utf-8') as f:
+                json.dump(self.playlists, f, ensure_ascii=False, indent=4)
+            
+            os.replace(temp_file, target_path)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to export playlists to {target_path}: {e}")
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+            return False
+
+    def import_playlists(self, source_path):
+        """Import external playlists JSON file into active state and local storage."""
+        if not os.path.exists(source_path):
+            return False
+        try:
+            with open(source_path, 'r', encoding='utf-8') as f:
+                imported_data = json.load(f)
+            
+            if isinstance(imported_data, dict):
+                self.playlists = imported_data
+                self.save_playlists()
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Failed to import playlists from {source_path}: {e}")
+            return False
+
+    def show_message_dialog(self, message_type, title, text):
+        """Helper method to construct and display native GTK pop-up messages."""
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            flags=0,
+            message_type=message_type,
+            buttons=Gtk.ButtonsType.OK,
+            text=title
+        )
+        dialog.format_secondary_text(text)
+        dialog.run()
+        dialog.destroy()
+
+    def on_export_playlists_clicked(self, widget):
+        """Handler to open a standard GTK dialog for exporting playlists."""
+        dialog = Gtk.FileChooserDialog(
+            title=_("Export Playlists As"),
+            transient_for=self,
+            action=Gtk.FileChooserAction.SAVE
+        )
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_SAVE, Gtk.ResponseType.ACCEPT
+        )
+        dialog.set_current_name("youtube_playlists_backup.json")
+        dialog.set_do_overwrite_confirmation(True)
+
+        filter_json = Gtk.FileFilter()
+        filter_json.set_name(_("JSON Files (*.json)"))
+        filter_json.add_mime_type("application/json")
+        filter_json.add_pattern("*.json")
+        dialog.add_filter(filter_json)
+
+        dialog.show_all()
+        response = dialog.run()
+        
+        if response == Gtk.ResponseType.ACCEPT:
+            target_path = dialog.get_filename()
+            
+            # Hide and destroy dialog immediately to prevent the window stack from freezing
+            dialog.hide()
+            dialog.destroy()
+            
+            if not target_path.lower().endswith('.json'):
+                target_path += '.json'
+                
+            if self.export_playlists(target_path):
+                logger.info(f"Successfully exported to {target_path}")
+                self.show_message_dialog(
+                    Gtk.MessageType.INFO,
+                    _("Export Successful"),
+                    _("Your playlists have been safely exported to:\n{}").format(target_path)
+                )
+            else:
+                self.show_message_dialog(
+                    Gtk.MessageType.ERROR,
+                    _("Export Failed"),
+                    _("Could not write the backup file. Please check folder permissions.")
+                )
+        else:
+            dialog.destroy()
+
+    def import_playlists(self, source_path, merge=False):
+        """
+        Import external playlists JSON file into active state and local storage.
+        :param source_path: Path to the JSON backup file.
+        :param merge: If True, merges data with existing playlists instead of overwriting.
+        """
+        if not os.path.exists(source_path):
+            return False
+        try:
+            with open(source_path, 'r', encoding='utf-8') as f:
+                imported_data = json.load(f)
+            
+            if isinstance(imported_data, dict):
+                if merge:
+                    # Merge logic: Combine dictionary objects safely
+                    for playlist_name, tracks in imported_data.items():
+                        if isinstance(tracks, list):
+                            if playlist_name not in self.playlists:
+                                self.playlists[playlist_name] = []
+                            
+                            # Keep track of existing URLs to avoid duplicate entries
+                            existing_urls = {
+                                t["url"] for t in self.playlists[playlist_name] 
+                                if isinstance(t, dict) and "url" in t
+                            }
+                            
+                            for track in tracks:
+                                if isinstance(track, dict) and "url" in track:
+                                    if track["url"] not in existing_urls:
+                                        self.playlists[playlist_name].append(track)
+                                        existing_urls.add(track["url"])
+                                elif isinstance(track, str):
+                                    # Fallback for plain string formats
+                                    if track not in self.playlists[playlist_name]:
+                                        self.playlists[playlist_name].append(track)
+                else:
+                    # Replace logic: Overwrite completely
+                    self.playlists = imported_data
+                
+                self.save_playlists()
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Failed to import playlists from {source_path}: {e}")
+            return False
+
+    def ask_merge_or_replace(self):
+        """Displays a dialog asking the user whether to Merge or Replace playlists."""
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            flags=Gtk.DialogFlags.MODAL,
+            message_type=Gtk.MessageType.QUESTION,
+            text=_("Import Strategy")
+        )
+        dialog.format_secondary_text(
+            _("Would you like to Merge the imported playlists with your existing ones, or completely Replace them?")
+        )
+        
+        # Add custom choice buttons with non-conflicting response codes
+        dialog.add_button(_("Merge Playlists"), 101)
+        dialog.add_button(_("Replace Existing"), 102)
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        
+        dialog.show_all()
+        response = dialog.run()
+        dialog.destroy()
+        return response
+
+    def on_import_playlists_clicked(self, widget):
+        """Handler to open a standard GTK dialog for importing playlists with conflict resolution."""
+        dialog = Gtk.FileChooserDialog(
+            title=_("Select Playlists File to Import"),
+            transient_for=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OPEN, Gtk.ResponseType.ACCEPT
+        )
+
+        filter_json = Gtk.FileFilter()
+        filter_json.set_name(_("JSON Files (*.json)"))
+        filter_json.add_pattern("*.json")
+        dialog.add_filter(filter_json)
+
+        dialog.show_all()
+        response = dialog.run()
+        
+        if response == Gtk.ResponseType.ACCEPT:
+            source_path = dialog.get_filename()
+            
+            # Hide and destroy file chooser immediately to clear the UI context
+            dialog.hide()
+            dialog.destroy()
+            
+            # Prompt the user for their merge preference
+            strategy = self.ask_merge_or_replace()
+            
+            if strategy == Gtk.ResponseType.CANCEL:
+                logger.info("Import cancelled by the user during strategy choice.")
+                return
+                
+            should_merge = (strategy == 101)
+            
+            # Process data parsing based on target strategy selection
+            if self.import_playlists(source_path, merge=should_merge):
+                logger.info(f"Successfully imported (merge={should_merge}) from {source_path}")
+                
+                # Defer layout changes using GLib thread loops to eliminate structural deadlocks
+                GLib.idle_add(self.safe_ui_refresh_after_import)
+                return
+            else:
+                self.show_message_dialog(
+                    Gtk.MessageType.ERROR,
+                    _("Import Failed"),
+                    _("The file could not be parsed. Make sure it is a valid playlists JSON backup.")
+                )
+        else:
+            dialog.destroy()
+
+    def safe_ui_refresh_after_import(self):
+        """Safely updates both the combo box and the TreeView layout after dialog closure."""
+        # 1. Ανανέωση του Dropdown Switcher (ξαναγεμίζει το ComboBox)
+        if hasattr(self, 'populate_playlist_combo'):
+            self.populate_playlist_combo()
+            
+        model = self.playlist_combo.get_model()
+        
+        # 2. Αν υπάρχουν playlists, επιλέγουμε αυτόματα την πρώτη νέα λίστα που εισήχθη
+        if self.playlists and model is not None:
+            # Παίρνουμε το όνομα της πρώτης λίστας από το λεξικό σας (π.χ. "μπελου")
+            available_keys = list(self.playlists.keys())
+            if available_keys:
+                target_key = available_keys[0]
+                
+                # Ψάχνουμε τη λίστα στο ComboBox για να τη θέσουμε ως ενεργή
+                tree_iter = model.get_iter_first()
+                while tree_iter is not None:
+                    row_text = model.get_value(tree_iter, 0)
+                    if row_text == target_key:
+                        self.playlist_combo.set_active_iter(tree_iter)
+                        break
+                    tree_iter = model.iter_next(tree_iter)
+
+        # 3. Πλήρης ανανέωση του TreeView με τα νέα δεδομένα
+        self.refresh_playlist_ui_view()
+        
+        # 4. Εμφάνιση του popup επιτυχίας
+        self.show_message_dialog(
+            Gtk.MessageType.INFO,
+            _("Import Successful"),
+            _("Playlists have been successfully loaded and updated into your layout!")
+        )
+        return False
+
+    def prompt_for_new_name(self, current_name):
+        """Opens a clean native dialog layout prompting for a string input return."""
+        dialog = Gtk.Dialog(
+            title=_("Rename Playlist"),
+            transient_for=self,
+            flags=Gtk.DialogFlags.MODAL
+        )
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OK, Gtk.ResponseType.OK
+        )
+        
+        box = dialog.get_content_area()
+        box.set_spacing(10)
+        box.set_border_width(12)
+        
+        label = Gtk.Label(label=_("Enter a new unique name for this playlist:"))
+        box.pack_start(label, False, False, 0)
+        
+        entry = Gtk.Entry()
+        entry.set_text(current_name)
+        entry.set_activates_default(True) # Pressing Enter triggers OK button
+        box.pack_start(entry, False, False, 0)
+        
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        dialog.show_all()
+        
+        response = dialog.run()
+        new_name = entry.get_text().strip()
+        dialog.destroy()
+        
+        if response == Gtk.ResponseType.OK and new_name:
+            return new_name
+        return None
+
+    def on_rename_playlist_clicked(self, widget):
+        """Handler to rename the currently active playlist profile cleanly."""
+        active_list_name = self.playlist_combo.get_active_text()
+        
+        if not active_list_name:
+            self.show_message_dialog(
+                Gtk.MessageType.WARNING,
+                _("Rename Void"),
+                _("No active playlist selected to rename.")
+            )
+            return
+
+        # Αποτροπή μετονομασίας αν έχεις κάποιο προστατευμένο default baseline προφίλ (π.χ. "Recent" / "Πρόσφατα")
+        if active_list_name == _("Recent") or active_list_name == "Recent":
+            self.show_message_dialog(
+                Gtk.MessageType.ERROR,
+                _("Action Denied"),
+                _("Cannot rename the default baseline profile.")
+            )
+            return
+
+        # Άνοιγμα του παραθύρου εισαγωγής κειμένου
+        new_list_name = self.prompt_for_new_name(active_list_name)
+        
+        if not new_list_name or new_list_name == active_list_name:
+            return # Cancelled or name wasn't changed
+
+        if new_list_name in self.playlists:
+            self.show_message_dialog(
+                Gtk.MessageType.ERROR,
+                _("Name Collision"),
+                _("Playlist name already exists!")
+            )
+            return
+
+        try:
+            # Λογική μετονομασίας: Δημιουργία νέου κλειδιού, αντιγραφή δεδομένων και διαγραφή του παλιού
+            self.playlists[new_list_name] = self.playlists.pop(active_list_name)
+            
+            # Αποθήκευση των αλλαγών τοπικά στον δίσκο
+            self.save_playlists()
+            logger.info(f"Successfully renamed playlist '{active_list_name}' to '{new_list_name}'")
+            
+            # Ανανέωση του ComboBox και σταθεροποίηση του Focus στο νέο όνομα
+            self.populate_playlist_combo()
+            
+            # Θέτουμε το νέο όνομα ως ενεργό στο drop-down μενού
+            model = self.playlist_combo.get_model()
+            if model is not None:
+                tree_iter = model.get_iter_first()
+                while tree_iter is not None:
+                    if model.get_value(tree_iter, 0) == new_list_name:
+                        self.playlist_combo.set_active_iter(tree_iter)
+                        break
+                    tree_iter = model.iter_next(tree_iter)
+            
+            # Ανανέωση της κύριας προβολής
+            self.refresh_playlist_ui_view()
+            
+        except Exception as e:
+            logger.error(f"Failed to rename playlist array entry: {e}")
+            self.show_message_dialog(
+                Gtk.MessageType.ERROR,
+                _("Error"),
+                _("An unexpected error occurred during the renaming process.")
+            )
+
 
     def on_destroy(self, widget):
         self.stop_playback()
         time.sleep(0.1) 
         Gtk.main_quit()
-
+        
 if __name__ == "__main__":
     win = YouTubeInsidePlayer()
     win.show_all()
