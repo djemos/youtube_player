@@ -16,7 +16,7 @@ sudo spkg youtube_player-6.0-noarch-1dj.txz
 
 
 
-<img width="1765" height="683" alt="Image" src="https://github.com/user-attachments/assets/0bb37492-8477-4db2-bbea-440764550f98" />  
+<img width="1538" height="683" alt="Image" src="https://github.com/user-attachments/assets/553e5c84-6c31-4057-894c-8c025a317821" />  
 
 
 
