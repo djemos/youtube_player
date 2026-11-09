@@ -1890,20 +1890,20 @@ class YouTubeInsidePlayer(Gtk.Window):
 
     def safe_ui_refresh_after_import(self):
         """Safely updates both the combo box and the TreeView layout after dialog closure."""
-        # 1. Ανανέωση του Dropdown Switcher (ξαναγεμίζει το ComboBox)
+        # 1.Refreshing the Dropdown Switcher (repopulates the ComboBox)
         if hasattr(self, 'populate_playlist_combo'):
             self.populate_playlist_combo()
             
         model = self.playlist_combo.get_model()
         
-        # 2. Αν υπάρχουν playlists, επιλέγουμε αυτόματα την πρώτη νέα λίστα που εισήχθη
+        # 2. If playlists exist, we automatically select the first new list that was added.
         if self.playlists and model is not None:
-            # Παίρνουμε το όνομα της πρώτης λίστας από το λεξικό σας (π.χ. "μπελου")
+            # We take the name of the first list from your dictionary
             available_keys = list(self.playlists.keys())
             if available_keys:
                 target_key = available_keys[0]
                 
-                # Ψάχνουμε τη λίστα στο ComboBox για να τη θέσουμε ως ενεργή
+                # We search for the list in the ComboBox in order to set it as active.
                 tree_iter = model.get_iter_first()
                 while tree_iter is not None:
                     row_text = model.get_value(tree_iter, 0)
@@ -1912,10 +1912,10 @@ class YouTubeInsidePlayer(Gtk.Window):
                         break
                     tree_iter = model.iter_next(tree_iter)
 
-        # 3. Πλήρης ανανέωση του TreeView με τα νέα δεδομένα
+        # 3. Complete refresh of the TreeView with the new data
         self.refresh_playlist_ui_view()
         
-        # 4. Εμφάνιση του popup επιτυχίας
+        # 4. Display the success popup
         self.show_message_dialog(
             Gtk.MessageType.INFO,
             _("Import Successful"),
@@ -1970,7 +1970,7 @@ class YouTubeInsidePlayer(Gtk.Window):
             )
             return
 
-        # Αποτροπή μετονομασίας αν έχεις κάποιο προστατευμένο default baseline προφίλ (π.χ. "Recent" / "Πρόσφατα")
+        # Prevent renaming if you have a protected default baseline profile (e.g., "Recent")
         if active_list_name == _("Recent") or active_list_name == "Recent":
             self.show_message_dialog(
                 Gtk.MessageType.ERROR,
@@ -1979,7 +1979,7 @@ class YouTubeInsidePlayer(Gtk.Window):
             )
             return
 
-        # Άνοιγμα του παραθύρου εισαγωγής κειμένου
+        # Opening the text input window
         new_list_name = self.prompt_for_new_name(active_list_name)
         
         if not new_list_name or new_list_name == active_list_name:
@@ -1994,17 +1994,17 @@ class YouTubeInsidePlayer(Gtk.Window):
             return
 
         try:
-            # Λογική μετονομασίας: Δημιουργία νέου κλειδιού, αντιγραφή δεδομένων και διαγραφή του παλιού
+            # Renaming logic: Creating a new key, copying data, and deleting the old one
             self.playlists[new_list_name] = self.playlists.pop(active_list_name)
             
-            # Αποθήκευση των αλλαγών τοπικά στον δίσκο
+            # Save changes locally to the disk
             self.save_playlists()
             logger.info(f"Successfully renamed playlist '{active_list_name}' to '{new_list_name}'")
             
-            # Ανανέωση του ComboBox και σταθεροποίηση του Focus στο νέο όνομα
+            # Refreshing the ComboBox and stabilizing the focus on the new name
             self.populate_playlist_combo()
             
-            # Θέτουμε το νέο όνομα ως ενεργό στο drop-down μενού
+            # We set the new name as active in the drop-down menu.
             model = self.playlist_combo.get_model()
             if model is not None:
                 tree_iter = model.get_iter_first()
@@ -2014,7 +2014,7 @@ class YouTubeInsidePlayer(Gtk.Window):
                         break
                     tree_iter = model.iter_next(tree_iter)
             
-            # Ανανέωση της κύριας προβολής
+            # Refresh the main view
             self.refresh_playlist_ui_view()
             
         except Exception as e:
